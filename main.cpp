@@ -12,6 +12,8 @@ int main()
 		return -1;
 
 	window.set_pixel(250, 250, Color(255, 0, 0));
+	//so far only absolute path for filename can be loaded.
+	window.load_image("test.png");
 
 	while (window.get_window_exit() == 0) {
 		window.window_messages();

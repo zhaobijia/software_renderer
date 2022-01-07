@@ -24,9 +24,13 @@ public:
 	int create_window(int w, int h, const TCHAR* title);
 	int initialize_window(int w, int h, const TCHAR* title);	
 	int create_frame(int w, int h, HWND hwnd);
-	void set_pixel(int x, int y, Color color);
-	void window_messages(void);	
+	void window_messages(void);
 	void window_update();
+
+	void set_pixel(int x, int y, Color color);
+	void load_image(char const* filename);
+	
+	
 	static LRESULT CALLBACK window_procedure(HWND, UINT, WPARAM, LPARAM);
 };
 

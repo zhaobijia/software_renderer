@@ -11,8 +11,7 @@ HBITMAP Window::old_bi_handle = NULL;
 Window::Window(int w, int h) :width(w), height(h)
 {
 	buffer = new unsigned int[w * h]{};
-	frame = new Frame(w, h);
-	
+	frame = new Frame();
 }
 
 Window::~Window() 
@@ -39,6 +38,32 @@ Window::~Window()
 void Window::set_pixel(int x, int y, Color color)
 {
 	frame->set_pixel(x, y, color);
+}
+
+void Window::load_image(char const* filename)
+{
+	if (frame->load_image(filename))
+	{
+		unsigned int* img = frame->get_loaded_image();
+		int img_width = frame->get_width();
+		int img_height = frame->get_height();
+		for (int i = 0; i < height; i++)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				
+				if (i<img_height && j<img_width)
+				{
+					buffer[i * width + j] = img[i * img_width + j];
+					
+				}
+				else 
+				{
+					buffer[i * width + j] = 0;
+				}
+			}
+		}
+	}
 }
 
 int Window::get_window_exit()
