@@ -63,10 +63,7 @@ void Mesh::read_texture_from_file(const char* filename)
 {
 
 }
-void Mesh::create_frome_vertices(std::vector<float3> _verts)
-{
 
-}
 int Mesh::vertex_count()
 {
 	return vertices.size();
