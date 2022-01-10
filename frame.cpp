@@ -4,7 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "libs/stb_image.h"
 
-Frame::Frame():width(0),height(0)
+Frame::Frame():width(0),height(0),bpp(0)
 {
 	framebuffer = new unsigned int[width * height]{};
 	zbuffer = new float[width * height]{};
