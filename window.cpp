@@ -10,10 +10,13 @@ HBITMAP Window::old_bi_handle = NULL;
 
 Window::Window(int w, int h) :width(w), height(h)
 {
-	buffer = new unsigned int[w * h]{};
-	frame = new Frame();
+	frame = new Frame(width, height);
 }
-
+Window::Window(Frame* f) : frame(f)
+{
+	width = f->get_width();
+	height = f->get_height();
+}
 Window::~Window() 
 {
 	if (hdc) {
@@ -35,10 +38,7 @@ Window::~Window()
 	}
 };
 
-void Window::set_pixel(int x, int y, Color color)
-{
-	frame->set_pixel(x, y, color);
-}
+
 
 void Window::load_image(char const* filename)
 {
@@ -103,6 +103,7 @@ int Window::create_window(int w, int h, const TCHAR* title)
 	exit = 0;
 	SetForegroundWindow(hwnd);
 	create_frame(w, h, hwnd);
+
 	ShowWindow(hwnd, SW_NORMAL);
 	window_messages();
 
@@ -120,10 +121,11 @@ int Window::initialize_window(int w, int h, const TCHAR* title) {
 
 int Window::create_frame(int w, int h, HWND hwnd)
 {
-
+	//if bheight is positive, bitmap is bottom-up dib (device independent bitmap)
+	//if bheight is negative, bit map is top-down dib
 	BITMAPINFOHEADER bi_header{
 		sizeof(BITMAPINFOHEADER),
-		w, -h,
+		w, h,
 		1, 32, BI_RGB,
 		w * h * 4,
 		0, 0, 0, 0

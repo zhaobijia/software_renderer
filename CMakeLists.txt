@@ -10,7 +10,7 @@ project (software_renderer)
 # Add source to this project's executable.
 
 file(GLOB source_files "*.h" "*.cpp" "libs/*.h")
-add_executable(software_renderer ${source_files})
+add_executable(software_renderer ${source_files} )
 # move files to build
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 

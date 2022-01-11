@@ -48,9 +48,10 @@ void Mesh::read_obj_from_file(const char* filename)
 		{
 			int3 v_read, vt_read, vn_read;
 			int read_count = sscanf(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &v_read.x, &vt_read.x, &vn_read.x, &v_read.y, &vt_read.y, &vn_read.y, &v_read.z, &vt_read.z, &vn_read.z);
-			vert_faces.push_back(v_read);
-			uv_faces.push_back(vt_read);
-			norm_faces.push_back(vn_read);
+			int3 one(1, 1, 1);//wavefront obj index start at 1
+			vert_faces.push_back(v_read - one);
+			uv_faces.push_back(vt_read - one);
+			norm_faces.push_back(vn_read - one);
 
 		}
 	}
@@ -73,4 +74,14 @@ int Mesh::vertex_count()
 int Mesh::face_count()
 {
 	return vert_faces.size();
+}
+
+float3 Mesh::get_vertex(int idx)
+{
+	return vertices[idx];
+}
+
+int3 Mesh::get_face(int idx)
+{
+	return vert_faces[idx];
 }

@@ -5,16 +5,16 @@
 
 int main()
 {	
-	TCHAR* title = _T("Test for win32 to work");
+	Mesh mesh;
+	mesh.read_obj_from_file("assets/african_head.obj");
+
+	TCHAR* title = _T("software_renderer");
 		
-	Window window(800,600);
+	Window window(800,800);
 
-	if (window.initialize_window(800, 600, title))
+	if (window.initialize_window(800, 800, title))
 		return -1;
-
-	window.set_pixel(250, 250, Color(255, 0, 0));
-	//so far only absolute path for filename can be loaded.
-	window.load_image("assets/test.png");
+	window.frame->wireframe(&mesh);
 
 	while (window.get_window_exit() == 0) {
 		window.window_messages();

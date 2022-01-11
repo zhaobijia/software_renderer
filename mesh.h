@@ -26,7 +26,8 @@ public:
 	void read_texture_from_file(const char* filename);
 	int vertex_count();
 	int face_count();
-
+	float3 get_vertex(int idx);
+	int3 get_face(int idx);
 };
 
 

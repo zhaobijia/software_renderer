@@ -8,6 +8,14 @@ Frame::Frame():width(0),height(0),bpp(0)
 {
 	framebuffer = new unsigned int[width * height]{};
 	zbuffer = new float[width * height]{};
+	rasterizer = new Rasterizer(width, height, framebuffer);
+}
+
+Frame::Frame(int w, int h) : width(w), height(h), bpp(0)
+{
+	framebuffer = new unsigned int[width * height]{};
+	zbuffer = new float[width * height]{};
+	rasterizer = new Rasterizer(width, height, framebuffer);
 }
 Frame::~Frame()
 {
@@ -17,7 +25,19 @@ Frame::~Frame()
 }
 void Frame::set_pixel(int x, int y, Color color)
 {
-	framebuffer[x * width + y] = color.get_color_uint32();
+	rasterizer->draw_pixel(x, y, color);
+}
+void Frame::set_line(int x0, int y0, int x1, int y1, Color color)
+{
+	rasterizer->draw_line(x0, y0, x1, y1, color);
+}
+void Frame::set_triangle()
+{
+
+}
+void Frame::wireframe(Mesh* mesh)
+{
+	rasterizer->draw_wireframe(mesh);
 }
 
 unsigned int* Frame::get_framebuffer()
@@ -27,7 +47,8 @@ unsigned int* Frame::get_framebuffer()
 
 void Frame::set_framebuffer(unsigned int* buffer)
 {
-	framebuffer = buffer;
+	framebuffer = buffer;//point to buffer
+	rasterizer->update_framebuffer(buffer);
 }
 
 int Frame::get_width()
