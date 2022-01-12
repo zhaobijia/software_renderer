@@ -31,13 +31,20 @@ void Frame::set_line(int x0, int y0, int x1, int y1, Color color)
 {
 	rasterizer->draw_line(x0, y0, x1, y1, color);
 }
-void Frame::set_triangle()
+void Frame::set_triangle(int2 p0, int2 p1, int2 p2, Color color)
 {
+
+	rasterizer->draw_triangle(p0,p1,p2,color);
 
 }
 void Frame::wireframe(Mesh* mesh)
 {
 	rasterizer->draw_wireframe(mesh);
+}
+
+void Frame::flatshading(Mesh* mesh)
+{
+	rasterizer->draw_flat_shading(mesh);
 }
 
 unsigned int* Frame::get_framebuffer()

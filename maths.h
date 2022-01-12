@@ -14,7 +14,7 @@ public:
 	T dot(const Vector2<T>& v){ return x * v.x + y * v.y; }
 	Vector2<T> operator +(const Vector2<T>& rhs){ return Vector2<T>(x + rhs.x, y + rhs.y); }
 	Vector2<T> operator -(const Vector2<T>& rhs){ return Vector2<T>(x - rhs.x, y - rhs.y); }
-	Vector2<T> operator *(T t){ return Vector2<T>(x * t, y * t); }
+	Vector2<T> operator *(float t){ return Vector2<T>(x * t, y * t); }
 	template<typename U> friend std::ostream& operator <<(std::ostream& out, const Vector2<U>& v);
 	
 };
@@ -47,7 +47,7 @@ public:
 
 	Vector3<T> operator +(const Vector3<T>& rhs){ return Vector3<T>(x + rhs.x, y + rhs.y, z + rhs.z); }
 	Vector3<T> operator -(const Vector3<T>& rhs){ return Vector3<T>(x - rhs.x, y - rhs.y, z - rhs.z); }
-	Vector3<T> operator *(T t){ return Vector3<T>(x * t, y * t, z * t); }
+	Vector3<T> operator *(float t){ return Vector3<T>(x * t, y * t, z * t); }
 	template<typename U> friend std::ostream& operator<< (std::ostream& out, const Vector3<U>& v);
 
 };
@@ -77,7 +77,7 @@ public:
 
 	Vector4<T> operator +(const Vector4<T>& rhs){ return Vector4<T>(x + rhs.x, y + rhs.y, z + rhs.z, w + rhs.w); }
 	Vector4<T> operator -(const Vector4<T>& rhs){ return Vector4<T>(x - rhs.x, y - rhs.y, z - rhs.z, w - rhs.w); }
-	Vector4<T> operator *(T t){ return Vector4<T>(x * t, y * t, z * t, w * t); }
+	Vector4<T> operator *(float t){ return Vector4<T>(x * t, y * t, z * t, w * t); }
 	template<typename U> friend std::ostream& operator<< (std::ostream& out, const Vector4<U>& v);
 };
 template<typename T> std::ostream& operator<<(std::ostream& out, const Vector4<T>& v)

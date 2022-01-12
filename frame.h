@@ -23,8 +23,9 @@ public:
 	void set_framebuffer(unsigned int* buffer);
 	void set_pixel(int x, int y, Color color);
 	void set_line(int x0, int y0, int x1, int y1, Color color);
-	void set_triangle();
+	void set_triangle(int2 p0, int2 p1, int2 p2, Color color);
 	void wireframe(Mesh* mesh);
+	void flatshading(Mesh* mesh);
 	bool load_image(char const* filename);
 	friend std::ostream& operator<<(std::ostream& out, const Frame& f);
 };

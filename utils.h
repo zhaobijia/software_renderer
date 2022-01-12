@@ -2,6 +2,8 @@
 #define __UTILS_H__
 #include<algorithm>
 #include<iostream>
+
+
 class Color
 {
 private:
@@ -15,5 +17,6 @@ public:
 	unsigned int get_color_uint32();
 	friend std::ostream& operator<<(std::ostream& out, const Color& c);
 };
+
 
 #endif //__UTILS_H__

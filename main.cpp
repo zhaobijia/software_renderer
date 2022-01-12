@@ -5,6 +5,8 @@
 
 int main()
 {	
+
+
 	Mesh mesh;
 	mesh.read_obj_from_file("assets/african_head.obj");
 
@@ -12,9 +14,10 @@ int main()
 		
 	Window window(800,800);
 
-	if (window.initialize_window(800, 800, title))
+	if (window.initialize_window(title))
 		return -1;
-	window.frame->wireframe(&mesh);
+	//window.frame->wireframe(&mesh);
+	window.frame->flatshading(&mesh);
 
 	while (window.get_window_exit() == 0) {
 		window.window_messages();

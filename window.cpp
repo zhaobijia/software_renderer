@@ -86,7 +86,7 @@ int Window::register_wndclass()
 	return 0;
 }
 //create the window
-int Window::create_window(int w, int h, const TCHAR* title)
+int Window::create_window( const TCHAR* title)
 {
 	DWORD window_style =  WS_OVERLAPPEDWINDOW | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 	hwnd = CreateWindowEx(
@@ -94,7 +94,7 @@ int Window::create_window(int w, int h, const TCHAR* title)
 		class_name,
 		title,
 		window_style,
-		CW_USEDEFAULT, CW_USEDEFAULT, w, h,
+		CW_USEDEFAULT, CW_USEDEFAULT, width, height,
 		NULL, 
 		NULL,
 		GetModuleHandle(NULL),
@@ -102,7 +102,7 @@ int Window::create_window(int w, int h, const TCHAR* title)
 	if (hwnd == NULL) return -1;
 	exit = 0;
 	SetForegroundWindow(hwnd);
-	create_frame(w, h, hwnd);
+	create_frame(width, height, hwnd);
 
 	ShowWindow(hwnd, SW_NORMAL);
 	window_messages();
@@ -110,11 +110,11 @@ int Window::create_window(int w, int h, const TCHAR* title)
 	return 0;
 }
 
-int Window::initialize_window(int w, int h, const TCHAR* title) {
+int Window::initialize_window(const TCHAR* title) {
 	if (register_wndclass())
 		return -1;
 	
-	if (create_window(w, h, title))
+	if (create_window( title))
 		return -1;
 	return 0;
 }

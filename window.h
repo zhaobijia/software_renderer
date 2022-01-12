@@ -25,8 +25,8 @@ public:
 
 	int get_window_exit();
 	int register_wndclass();
-	int create_window(int w, int h, const TCHAR* title);
-	int initialize_window(int w, int h, const TCHAR* title);	
+	int create_window(const TCHAR* title);
+	int initialize_window( const TCHAR* title);	
 	int create_frame(int w, int h, HWND hwnd);
 	void window_messages(void);
 	void window_update();
