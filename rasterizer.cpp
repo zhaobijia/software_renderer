@@ -1,5 +1,5 @@
 #include "rasterizer.h"
-
+#define EPS 0.0001f
 Rasterizer::Rasterizer(int w, int h, unsigned int* fb):width(w),height(h),framebuffer(fb){}
 
 Rasterizer::~Rasterizer(){}
@@ -118,7 +118,7 @@ bool Rasterizer::barycentric(int2 pt, int2 t0, int2 t1, int2 t2)
     float3 bary = vx.cross(vy);
     bary = float3(bary.x / bary.z, bary.y / bary.z, 1.);
 
-    return (bary.x >= 0) && (bary.y >= 0) && (bary.x + bary.y < 1);
+    return (bary.x >=0-EPS) && (bary.y >= 0-EPS) && (bary.x + bary.y < 1+EPS);
 }
 
 void Rasterizer::barycentric_triangle(int2 p0, int2 p1, int2 p2, box_t &bbox,Color color)
@@ -187,15 +187,27 @@ void Rasterizer::draw_flat_shading(Mesh* mesh)
     for (int i = 0; i < mesh->face_count(); i++)
     {
         int3 f = mesh->get_face(i);
+        //vertex of a triangle
         float3 verts[3];
         verts[0] = mesh->get_vertex(f.x);
         verts[1] = mesh->get_vertex(f.y);
         verts[2] = mesh->get_vertex(f.z);
 
-        int2 p0 = int2((verts[0].x+1.)*width/2., (verts[0].y+1.)*height/2.);
-        int2 p1 = int2((verts[1].x + 1.) * width / 2., (verts[1].y + 1.) * height / 2.);
-        int2 p2 = int2((verts[2].x + 1.) * width / 2., (verts[2].y + 1.) * height / 2.);
+        //screen coords:
+        int2 screen[3];
+        for (int i = 0; i < 3; i++)
+        {
+            screen[i] = int2((verts[i].x + 1.) * width / 2., (verts[i].y + 1.) * height / 2.);
+        }
+        //normal of the triangle
+        float3 normal = ((verts[2] - verts[0]).cross(verts[1] - verts[0])).normalize();
 
-        draw_triangle(p0, p1, p2, Color(std::rand() % 255, std::rand() % 255, std::rand() % 255));
+        float3 _light(0, 0, -1);
+        float intensity = _light.dot(normal);
+        if (intensity > 0)
+        {
+            draw_triangle(screen[0], screen[1], screen[2], Color(255 * intensity, 255 * intensity, 255 * intensity));
+        }
+        
     }
 }
