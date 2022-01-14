@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <tchar.h>
 #include "frame.h"
-
+#include "texture.h"
 class Window
 {
 private:
@@ -30,7 +30,7 @@ public:
 	int create_frame(int w, int h, HWND hwnd);
 	void window_messages(void);
 	void window_update();
-	void load_image(char const* filename);
+	void load_image(Texture* texture);
 	
 	
 	static LRESULT CALLBACK window_procedure(HWND, UINT, WPARAM, LPARAM);

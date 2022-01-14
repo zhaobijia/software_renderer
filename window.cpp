@@ -40,13 +40,13 @@ Window::~Window()
 
 
 
-void Window::load_image(char const* filename)
+void Window::load_image(Texture* texture)
 {
-	if (frame->load_image(filename))
+	if (texture)
 	{
-		unsigned int* img = frame->get_loaded_image();
-		int img_width = frame->get_width();
-		int img_height = frame->get_height();
+		unsigned int* img = (unsigned int*)texture->get_texture();
+		int img_width = texture->get_width();
+		int img_height = texture->get_height();
 		for (int i = 0; i < height; i++)
 		{
 			for (int j = 0; j < width; j++)

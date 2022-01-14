@@ -3,7 +3,9 @@
 #include <assert.h>
 #include "mesh.h"
 
+
 Mesh::Mesh() {}
+
 Mesh::~Mesh() {}
 
 void Mesh::read_obj_from_file(const char* filename)
@@ -60,9 +62,18 @@ void Mesh::read_obj_from_file(const char* filename)
 	std::cout << "normal faces:" << norm_faces.size() << ",";
 
 }
-void Mesh::read_texture_from_file(const char* filename)
+void Mesh::set_diffuse_texture(Texture* texture)
 {
+	diffuse_texture = texture;
+}
 
+bool Mesh::has_diffuse_texture()
+{
+	if (&diffuse_texture)
+	{
+		return true;
+	}
+	return false;
 }
 
 int Mesh::vertex_count()
@@ -81,7 +92,27 @@ float3 Mesh::get_vertex(int idx)
 	return vertices[idx];
 }
 
-int3 Mesh::get_face(int idx)
+int2 Mesh::get_uv_coord(int idx)
+{
+	float2 uv_01 = uvs[idx];
+	int2 uv_coord = int2(uv_01.x * diffuse_texture->get_width(), uv_01.y * diffuse_texture->get_height());
+	return uv_coord;
+}
+
+
+
+int3 Mesh::get_pos_idx(int idx)
 {
 	return vert_faces[idx];
+}
+
+
+int3 Mesh::get_uv_idx(int idx)
+{
+	return uv_faces[idx];
+}
+
+Texture* Mesh::get_diffuse_texture()
+{
+	return diffuse_texture;
 }

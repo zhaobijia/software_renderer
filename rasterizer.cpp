@@ -1,17 +1,64 @@
 #include "rasterizer.h"
-#define EPS 0.0001f
-Rasterizer::Rasterizer(int w, int h, unsigned int* fb):width(w),height(h),framebuffer(fb){}
+#include <bitset>
+#define EPS 0.001f
+Rasterizer::Rasterizer(int w, int h, unsigned int* fb, float* zb)
+    :width(w),height(h),framebuffer(fb),zbuffer(zb)
+{
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            zbuffer[y * width + x] = std::numeric_limits<float>::min();
+        }
+    }
+}
 
-Rasterizer::~Rasterizer(){}
+Rasterizer::~Rasterizer() {}
+
+
 
 void Rasterizer::update_framebuffer(unsigned int* buffer)
 {
     framebuffer = buffer;
 }
 
-void Rasterizer::draw_pixel(int x, int y, Color color) {
 
- 	framebuffer[y * width + x] = color.get_color_uint32();
+void Rasterizer::set_zbuffer_value(int x, int y, float t)
+{
+    zbuffer[y * width + x] = t;
+}
+
+float Rasterizer::get_zbuffer_value(int x, int y)
+{
+    return zbuffer[y * width + x];
+}
+
+void Rasterizer::set_framebuffer_to_zbuffer()
+{
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            float z = zbuffer[width * y + x];
+            if (z > 0)
+            {    
+                z = 255 * (z / height);
+                z = Color(z, z, z).get_color_uint32();
+            }
+            framebuffer[width * y + x] = z;
+            
+        }
+    }
+}
+
+void Rasterizer::draw_pixel(int x, int y, Color color)
+{
+    framebuffer[y * width + x] = color.get_color_uint32();
+}
+
+void Rasterizer::draw_pixel(int x, int y, int color)
+{
+    framebuffer[y * width + x] = color;
 }
 
 void Rasterizer::draw_line(int x0, int y0, int x1, int y1, Color color)
@@ -57,7 +104,7 @@ void Rasterizer::simple_clipping(int h, int w, int* x, int* y)
 
 
 
-void Rasterizer::line_sweeping_triangle(int2 p0, int2 p1, int2 p2, Color color)
+void Rasterizer::line_sweeping_triangle(float3 p0, float3 p1, float3 p2, Color color)
 {
     //sort 3 pts base on y (height)
     if (p2.y > p0.y) std::swap(p0, p2);
@@ -66,9 +113,9 @@ void Rasterizer::line_sweeping_triangle(int2 p0, int2 p1, int2 p2, Color color)
     
     //fill upper triangle and lower triangle
 
-    int2 short01_dir = p1 - p0;
-    int2 short12_dir = p2 - p1;
-    int2 long_dir = p2 - p0;
+    float3 short01_dir = p1 - p0;
+    float3 short12_dir = p2 - p1;
+    float3 long_dir = p2 - p0;
     float short01_y = p1.y - p0.y;
     float short12_y = p2.y - p1.y;
     float long_y = p2.y - p0.y;
@@ -78,9 +125,9 @@ void Rasterizer::line_sweeping_triangle(int2 p0, int2 p1, int2 p2, Color color)
         float t01 = short01_y == 0 ? 0 : (j - p0.y )/ short01_y;
         float t12 = short12_y == 0 ? 0 : (j - p1.y) / short12_y;
         float t02 = long_y == 0 ? 0 : (j - p0.y )/ long_y;
-        int2 pt_short01 = p0 + short01_dir * t01;
-        int2 pt_short12 = p1 + short12_dir * t12;
-        int2 pt_long = p0 + long_dir * t02;
+        float3 pt_short01 = p0 + short01_dir * t01;
+        float3 pt_short12 = p1 + short12_dir * t12;
+        float3 pt_long = p0 + long_dir * t02;
         if (j > p1.y)
         {
             //upper
@@ -95,62 +142,109 @@ void Rasterizer::line_sweeping_triangle(int2 p0, int2 p1, int2 p2, Color color)
     }
    
 }
-box_t Rasterizer::bounding_box(int2 p0, int2 p1, int2 p2)
+box_t Rasterizer::bounding_box(float2 p0, float2 p1, float2 p2)
 {
     box_t box;
-    int2 clamp(width, height);
+    float2 clamp(width, height);
     box.max.x = std::min(clamp.x,std::max(std::max(p0.x,p1.x),p2.x));
     box.max.y = std::min(clamp.y, std::max(std::max(p0.y, p1.y), p2.y));
-    box.min.x = std::max(0, std::min(std::min(p0.x, p1.x), p2.x));
-    box.min.y = std::max(0, std::min(std::min(p0.y, p1.y), p2.y));
+    box.min.x = std::max(0.f, std::min(std::min(p0.x, p1.x), p2.x));
+    box.min.y = std::max(0.f, std::min(std::min(p0.y, p1.y), p2.y));
     box.area = (box.max.x - box.min.x) * (box.max.y - box.min.y);
     return box;
 }
 
-bool Rasterizer::barycentric(int2 pt, int2 t0, int2 t1, int2 t2)
+float3 Rasterizer::barycentric(float3 pt, float3 t0, float3 t1, float3 t2)
 {
-    int2 v0 = t0 - t1;
-    int2 v1 = t0 - t2;
-    int2 v2 = pt - t0;
+    float3 v0 = t1 - t0; 
+    float3 v1 = t2 - t0;
+    float3 v2 = t0 - pt;
 
     float3 vx(v0.x, v1.x, v2.x);
     float3 vy(v0.y, v1.y, v2.y);
     float3 bary = vx.cross(vy);
-    bary = float3(bary.x / bary.z, bary.y / bary.z, 1.);
+    if (std::abs(bary.z) < EPS)
+    {
+        return float3(-1.f, 1.f, 1.f);
+    }
+    else
+    {
+        bary = float3(bary.x / bary.z, bary.y / bary.z, 1.);
 
-    return (bary.x >=0-EPS) && (bary.y >= 0-EPS) && (bary.x + bary.y < 1+EPS);
+        return bary;
+    }
+    
 }
 
-void Rasterizer::barycentric_triangle(int2 p0, int2 p1, int2 p2, box_t &bbox,Color color)
+
+void Rasterizer::draw_triangle(float3* tri, Color color)
 {
+    float2 pt0(tri[0].x, tri[0].y);
+    float2 pt1(tri[1].x, tri[1].y);
+    float2 pt2(tri[2].x, tri[2].y);
+    box_t bbox = bounding_box(pt0, pt1, pt2);
 
     for (int i = bbox.min.x; i < bbox.max.x; i++)
     {
         for (int j = bbox.min.y; j < bbox.max.y; j++)
         {
-            
-            if (barycentric(int2(i, j), p0, p1, p2))
+            float3 _pt(i, j, 0);//zvalue can only be found after barycentric
+            float3 bary = barycentric(_pt, tri[0], tri[1], tri[2]);//x = u, y = v, z=1
+            //check inside triangle
+            if (bary.x >= 0 - EPS && bary.y >= 0 - EPS && (bary.x + bary.y) <= 1.f + EPS)
             {
+                float3 pt = tri[0] + (tri[1] - tri[0]) * bary.x + (tri[2] - tri[0]) * bary.y;
+                if (pt.z > get_zbuffer_value(i, j))
+                {
+                    set_zbuffer_value(i, j, pt.z);
+                    draw_pixel(i, j, color);
+                }
 
-                draw_pixel(i, j, color);
+            }
+        }
+    }
+    
+}
+
+void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map )
+{
+    float2 pt0(tri[0].x, tri[0].y);
+    float2 pt1(tri[1].x, tri[1].y);
+    float2 pt2(tri[2].x, tri[2].y);
+    box_t bbox = bounding_box(pt0, pt1, pt2);
+    unsigned int* texture = uv_map->get_texture();
+    int texture_width = uv_map->get_width();
+    int texture_height = uv_map->get_height();
+
+
+    for (int i = bbox.min.x; i < bbox.max.x; i++)
+    {
+        for (int j = bbox.min.y; j < bbox.max.y; j++)
+        {
+            float3 _pt(i, j, 0);//zvalue can only be found after barycentric
+            float3 bary = barycentric(_pt, tri[0], tri[1], tri[2]);//x = u, y = v, z=1
+
+            //check inside triangle
+            if (bary.x >= 0 - EPS && bary.y >= 0 - EPS && (bary.x + bary.y) <= 1.f + EPS)
+            {
+                float3 pt = tri[0] + (tri[1] - tri[0]) * bary.x + (tri[2] - tri[0]) * bary.y;
+                int2 uv_coord = uv[0] + (uv[1] - uv[0]) * bary.x + (uv[2] - uv[0]) * bary.y;
+
+                int color = texture[uv_coord.y * texture_width + uv_coord.x];
+
+                
+                if (pt.z > get_zbuffer_value(i, j))
+                {
+                    //update z buffer
+
+                    set_zbuffer_value(i, j, pt.z);
+                    draw_pixel(i, j, color);
+                }
+
             }
         }
     }
 
-}
-
-void Rasterizer::draw_triangle(int2 p0, int2 p1, int2 p2, Color color)
-{
-    box_t bbox = bounding_box(p0, p1, p2);
-
-    if (bbox.area > .5f * width * height)
-    {
-        line_sweeping_triangle(p0, p1, p2, color);
-    }
-    else
-    {
-        barycentric_triangle(p0, p1, p2, bbox, color);
-    }
 }
 
 
@@ -159,7 +253,7 @@ void Rasterizer::draw_wireframe(Mesh* mesh)
     //for each face(triangle vertex group) in mesh
     for (int i = 0; i < mesh->face_count(); i++)
     {
-        int3 f = mesh->get_face(i);
+        int3 f = mesh->get_pos_idx(i);
         float3 verts[3];
         verts[0] = mesh->get_vertex(f.x);
         verts[1] = mesh->get_vertex(f.y);
@@ -186,27 +280,49 @@ void Rasterizer::draw_flat_shading(Mesh* mesh)
 {
     for (int i = 0; i < mesh->face_count(); i++)
     {
-        int3 f = mesh->get_face(i);
+        int3 pos_idx = mesh->get_pos_idx(i);
         //vertex of a triangle
         float3 verts[3];
-        verts[0] = mesh->get_vertex(f.x);
-        verts[1] = mesh->get_vertex(f.y);
-        verts[2] = mesh->get_vertex(f.z);
+        verts[0] = mesh->get_vertex(pos_idx.x);
+        verts[1] = mesh->get_vertex(pos_idx.y);
+        verts[2] = mesh->get_vertex(pos_idx.z);
 
-        //screen coords:
-        int2 screen[3];
+        //screen coords(change to float3 b/c adding zbuffer)
+        float3 screen[3];
         for (int i = 0; i < 3; i++)
         {
-            screen[i] = int2((verts[i].x + 1.) * width / 2., (verts[i].y + 1.) * height / 2.);
+            //temporary enlarge z so that z buffer can have a better accuracy
+            screen[i] = float3((verts[i].x + 1.f) * width / 2.f, (verts[i].y + 1.f) * height / 2.f, (verts[i].z + 1.f) * height / 2.f );
         }
-        //normal of the triangle
+        //normal of this triangle
         float3 normal = ((verts[2] - verts[0]).cross(verts[1] - verts[0])).normalize();
 
+        //temporary light source:
         float3 _light(0, 0, -1);
+
         float intensity = _light.dot(normal);
+
         if (intensity > 0)
         {
-            draw_triangle(screen[0], screen[1], screen[2], Color(255 * intensity, 255 * intensity, 255 * intensity));
+            //load texture
+            if (mesh->has_diffuse_texture())
+            {
+                int3 uv_idx = mesh->get_uv_idx(i);
+                int2 uvs[3];
+                uvs[0] = mesh->get_uv_coord(uv_idx.x);
+                uvs[1] = mesh->get_uv_coord(uv_idx.y);
+                uvs[2] = mesh->get_uv_coord(uv_idx.z);
+
+                Texture* uv_map = mesh->get_diffuse_texture();
+                draw_textured_triangle(screen, uvs, uv_map);
+
+            }
+            else
+            {
+
+                draw_triangle(screen, Color(255 * intensity, 255 * intensity, 255 * intensity));
+
+            }
         }
         
     }
