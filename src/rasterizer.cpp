@@ -206,13 +206,13 @@ void Rasterizer::draw_triangle(float3* tri, Color color)
     
 }
 
-void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map )
+void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map, float intensity)
 {
     float2 pt0(tri[0].x, tri[0].y);
     float2 pt1(tri[1].x, tri[1].y);
     float2 pt2(tri[2].x, tri[2].y);
     box_t bbox = bounding_box(pt0, pt1, pt2);
-    unsigned int* texture = uv_map->get_texture();
+    Color* texture = uv_map->get_texture_color();
     int texture_width = uv_map->get_width();
     int texture_height = uv_map->get_height();
 
@@ -230,8 +230,8 @@ void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map )
                 float3 pt = tri[0] + (tri[1] - tri[0]) * bary.x + (tri[2] - tri[0]) * bary.y;
                 int2 uv_coord = uv[0] + (uv[1] - uv[0]) * bary.x + (uv[2] - uv[0]) * bary.y;
 
-                int color = texture[uv_coord.y * texture_width + uv_coord.x];
-
+                Color color = texture[uv_coord.y * texture_width + uv_coord.x] * intensity;
+                
                 
                 if (pt.z > get_zbuffer_value(i, j))
                 {
@@ -314,7 +314,7 @@ void Rasterizer::draw_flat_shading(Mesh* mesh)
                 uvs[2] = mesh->get_uv_coord(uv_idx.z);
 
                 Texture* uv_map = mesh->get_diffuse_texture();
-                draw_textured_triangle(screen, uvs, uv_map);
+                draw_textured_triangle(screen, uvs, uv_map, intensity);
 
             }
             else

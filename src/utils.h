@@ -13,8 +13,9 @@ public:
 	Color();
 	Color(int _r, int _g, int _b);
 	~Color();
-	int color_255(int _c);
+	int clamp(int _c);
 	unsigned int get_color_uint32();
+	Color operator *(float t) { return Color(r * t, g * t, b * t); }
 	friend std::ostream& operator<<(std::ostream& out, const Color& c);
 };
 

@@ -36,7 +36,7 @@ public:
 	float3 barycentric(float3 pt, float3 t0, float3 t1, float3 t2);
 
 	void draw_triangle(float3* tri, Color color);
-	void draw_textured_triangle(float3* tri, int2* uv, Texture* texture);
+	void draw_textured_triangle(float3* tri, int2* uv, Texture* texture, float intensity);
 	void draw_wireframe(Mesh* mesh);
 	void draw_flat_shading(Mesh* mesh);
 	void simple_clipping(int h, int w, int* x, int* y);
