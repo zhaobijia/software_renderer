@@ -38,7 +38,7 @@ public:
 	void draw_triangle(float3* tri, Color color);
 	void draw_textured_triangle(float3* tri, int2* uv, Texture* texture, float intensity);
 	void draw_wireframe(Mesh* mesh);
-	void draw_flat_shading(Mesh* mesh);
+	void draw_flat_shading(Mesh* mesh, float4x4 mvp);
 	void simple_clipping(int h, int w, int* x, int* y);
 };
 

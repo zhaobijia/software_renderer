@@ -1,6 +1,8 @@
 #include "rasterizer.h"
 #include <bitset>
 #define EPS 0.001f
+
+
 Rasterizer::Rasterizer(int w, int h, unsigned int* fb, float* zb)
     :width(w),height(h),framebuffer(fb),zbuffer(zb)
 {
@@ -276,7 +278,7 @@ void Rasterizer::draw_wireframe(Mesh* mesh)
     }
 }
 
-void Rasterizer::draw_flat_shading(Mesh* mesh)
+void Rasterizer::draw_flat_shading(Mesh* mesh, float4x4 mvp)
 {
     for (int i = 0; i < mesh->face_count(); i++)
     {
@@ -291,9 +293,15 @@ void Rasterizer::draw_flat_shading(Mesh* mesh)
         float3 screen[3];
         for (int i = 0; i < 3; i++)
         {
+
+            verts[i] = mvp * verts[i];
             //temporary enlarge z so that z buffer can have a better accuracy
             screen[i] = float3((verts[i].x + 1.f) * width / 2.f, (verts[i].y + 1.f) * height / 2.f, (verts[i].z + 1.f) * height / 2.f );
+
+           
         }
+
+        
         //normal of this triangle
         float3 normal = ((verts[2] - verts[0]).cross(verts[1] - verts[0])).normalize();
 

@@ -22,7 +22,7 @@ public:
 	void set_line(int x0, int y0, int x1, int y1, Color color);
 	void set_triangle(float3* tri, Color color);
 	void wireframe(Mesh* mesh);
-	void flat_shading(Mesh* mesh);
+	void flat_shading(Mesh* mesh, float4x4 mvp);
 	friend std::ostream& operator<<(std::ostream& out, const Frame& f);
 };
 

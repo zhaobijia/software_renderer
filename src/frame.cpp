@@ -40,9 +40,9 @@ void Frame::wireframe(Mesh* mesh)
 	rasterizer->draw_wireframe(mesh);
 }
 
-void Frame::flat_shading(Mesh* mesh)
+void Frame::flat_shading(Mesh* mesh, float4x4 mvp)
 {
-	rasterizer->draw_flat_shading(mesh);
+	rasterizer->draw_flat_shading(mesh,mvp);
 }
 
 unsigned int* Frame::get_framebuffer()
