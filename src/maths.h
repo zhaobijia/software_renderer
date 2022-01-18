@@ -4,6 +4,7 @@
 #include <iostream>
 #include <assert.h>
 
+# define M_PI           3.14159265358979323846  /* pi */
 
 template<typename T> class Vector2
 {
@@ -211,10 +212,10 @@ public:
 	{
 		Matrix4<T> matrix;
 		matrix.set_identity();
-		matrix[1][1] = std::cos(theta);
-		matrix[2][1] = std::sin(theta);
-		matrix[1][2] = -std::sin(theta);
-		matrix[2][2] = std::cos(theta);
+		matrix.m[1][1] = std::cos(theta);
+		matrix.m[2][1] = std::sin(theta);
+		matrix.m[1][2] = -std::sin(theta);
+		matrix.m[2][2] = std::cos(theta);
 		return matrix;
 	}
 
@@ -222,10 +223,10 @@ public:
 	{
 		Matrix4<T> matrix;
 		matrix.set_identity();
-		matrix[0][0] = std::cos(theta);
-		matrix[2][0] = -std::sin(theta);
-		matrix[0][2] = std::sin(theta);
-		matrix[2][2] = std::cos(theta);
+		matrix.m[0][0] = std::cos(theta);
+		matrix.m[2][0] = -std::sin(theta);
+		matrix.m[0][2] = std::sin(theta);
+		matrix.m[2][2] = std::cos(theta);
 		return matrix;
 	}
 
@@ -233,10 +234,10 @@ public:
 	{
 		Matrix4<T> matrix;
 		matrix.set_identity();
-		matrix[0][0] = std::cos(theta);
-		matrix[1][0] = std::sin(theta);
-		matrix[0][1] = -std::sin(theta);
-		matrix[1][1] = std::cos(theta);
+		matrix.m[0][0] = std::cos(theta);
+		matrix.m[1][0] = std::sin(theta);
+		matrix.m[0][1] = -std::sin(theta);
+		matrix.m[1][1] = std::cos(theta);
 		return matrix;
 	}
 
@@ -249,17 +250,17 @@ public:
 		float c = std::cos(theta);
 		float s = std::sin(theta);
 
-		matrix[0][0] = v.x * v.x * (1 - c) + c;
-		matrix[1][0] = v.y * v.x * (1 - c) + v.z * s;
-		matrix[2][0] = v.x * v.z * (1 - c) - v.y * s;
+		matrix.m[0][0] = v.x * v.x * (1 - c) + c;
+		matrix.m[1][0] = v.y * v.x * (1 - c) + v.z * s;
+		matrix.m[2][0] = v.x * v.z * (1 - c) - v.y * s;
 
-		matrix[0][1] = v.x * v.y * (1 - c) - v.z * s;
-		matrix[1][1] = v.y * v.y * (1 - c) + c;
-		matrix[2][1] = v.y * v.z * (1 - c) + v.x * s;
+		matrix.m[0][1] = v.x * v.y * (1 - c) - v.z * s;
+		matrix.m[1][1] = v.y * v.y * (1 - c) + c;
+		matrix.m[2][1] = v.y * v.z * (1 - c) + v.x * s;
 
-		matrix[0][2] = v.x * v.z * (1 - c) + v.y * s;
-		matrix[1][2] = v.y * v.z * (1 - c) - v.x * s;
-		matrix[2][2] = v.z * v.z * (1 - c) + c;
+		matrix.m[0][2] = v.x * v.z * (1 - c) + v.y * s;
+		matrix.m[1][2] = v.y * v.z * (1 - c) - v.x * s;
+		matrix.m[2][2] = v.z * v.z * (1 - c) + c;
 
 		return matrix;
 	}

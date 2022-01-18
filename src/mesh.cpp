@@ -50,6 +50,7 @@ void Mesh::read_obj_from_file(const char* filename)
 		{
 			int3 v_read, vt_read, vn_read;
 			int read_count = sscanf(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &v_read.x, &vt_read.x, &vn_read.x, &v_read.y, &vt_read.y, &vn_read.y, &v_read.z, &vt_read.z, &vn_read.z);
+			assert(read_count == 9);
 			int3 one(1, 1, 1);//wavefront obj index start at 1
 			vert_faces.push_back(v_read - one);
 			uv_faces.push_back(vt_read - one);

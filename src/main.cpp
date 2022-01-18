@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include "window.h"
 #include "mesh.h"
-
+#include "camera.h"
 
 int main()
 {	
@@ -11,9 +11,12 @@ int main()
 	Texture texture("assets/african_head_diffuse.tga");
 	mesh.set_diffuse_texture(&texture);
 	
+	//set camera
+	Camera cam(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0));
+
 	//set mvp 
 	float4x4 mvp;
-	mvp = mvp.set_mvp(float3(0,0,-1.5), float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), -1,1,-1,1,-10,-1);
+	mvp = mvp.set_mvp(float3(0,0,-1), cam.position, cam.lookat, cam.up, -1,1,-1,1,-100,-1);
 	
 	
 
