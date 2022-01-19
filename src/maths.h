@@ -317,21 +317,25 @@ public:
 	//map a cuboid [l,r]x[b,t]x[f,n] to the canonical cube [-1,1]x[-1,1]x[-1,1]
 	Matrix4<T> orthographic_projection(T l, T r, T b, T t, T f, T n)
 	{
-		Matrix4<T> ortho_translate;
+		/*Matrix4<T> ortho_translate;
 		Matrix4<T> ortho_scale;
-		Matrix4<T> ortho_matrix;
 		ortho_translate.set_identity();
 		ortho_scale.set_identity();
-
 		ortho_translate.m[0][3] = -(r + l) / 2.;
 		ortho_translate.m[1][3] = -(t + b) / 2.;
-		ortho_translate.m[2][3] = -(n + f) / 2.;
-		
+		ortho_translate.m[2][3] = -(n + f) / 2.;	
 		ortho_scale.m[0][0] = 2. / (r - l);
 		ortho_scale.m[1][1] = 2. / (t - b);
 		ortho_scale.m[2][2] = 2. / (n - f);
-
-		ortho_matrix = ortho_scale * ortho_translate;
+		ortho_matrix = ortho_scale * ortho_translate;*/
+		Matrix4<T> ortho_matrix;
+		ortho_matrix.set_identity();
+		ortho_matrix.m[0][0] = 2. / (r - l);
+		ortho_matrix.m[1][1] = 2. / (t - b);
+		ortho_matrix.m[2][2] = 2. / (n - f);
+		ortho_matrix.m[0][3] = -(r + l) / 2.;
+		ortho_matrix.m[1][3] = -(t + b) / 2.;
+		ortho_matrix.m[2][3] = -(n + f) / 2.;
 		return ortho_matrix;
 	}
 
@@ -341,7 +345,7 @@ public:
 	//-far plane's z value does not change, far plane's center point does not change
 	Matrix4<T> perspective_projection(T l, T r, T b, T t, T f, T n)
 	{
-		Matrix4<T> ortho = orthographic_projection(l, r, b, t, f, n);
+		/*Matrix4<T> ortho = orthographic_projection(l, r, b, t, f, n);
 		Matrix4<T> persp_to_ortho;
 		Matrix4<T> persp_matrix;
 		persp_to_ortho.m[0][0] = n;
@@ -349,8 +353,17 @@ public:
 		persp_to_ortho.m[3][2] = 1;
 		persp_to_ortho.m[2][2] = n + f;
 		persp_to_ortho.m[2][3] = -n*f;
+		persp_matrix = ortho*persp_to_ortho;*/
+		
+		Matrix4<T> persp_matrix;
+		persp_matrix.m[0][0] = 2 * n / (r - l);
+		persp_matrix.m[1][1] = 2 * n / (t - b);
+		persp_matrix.m[0][2] = (r + l) / (r - l);
+		persp_matrix.m[1][2] = (t + b) / (t - b);
+		persp_matrix.m[2][2] = (f + n) / (n - f);
+		persp_matrix.m[3][2] = 1;
+		persp_matrix.m[2][3] = -2 * f * n / (n - f);
 
-		persp_matrix = ortho*persp_to_ortho;
 		return persp_matrix;
 
 	}

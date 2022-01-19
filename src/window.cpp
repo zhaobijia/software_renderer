@@ -1,16 +1,20 @@
 ﻿#include "window.h"
 #include <iostream>
 
+int Window::win_width = 0;
+int Window::win_height = 0;
 LPCSTR class_name = "Main_Window_Class";
 int Window::exit = 0;
 HWND Window::hwnd = NULL; //windle handle
 HDC Window::hdc = NULL;	//a handle to something you can draw on
 HBITMAP Window::bi_handle =NULL;		
 HBITMAP Window::old_bi_handle = NULL;		
-
+Camera* Window::camera = NULL;
+POINT Window::prev_pt;
 Window::Window(int w, int h) :width(w), height(h)
 {
 	frame = new Frame(width, height);
+
 }
 Window::Window(Frame* f) : frame(f)
 {
@@ -19,6 +23,8 @@ Window::Window(Frame* f) : frame(f)
 }
 Window::~Window() 
 {
+
+	delete frame;
 	if (hdc) {
 		if (old_bi_handle)
 		{
@@ -36,6 +42,7 @@ Window::~Window()
 	{
 		CloseWindow(hwnd);
 	}
+	
 };
 
 
@@ -70,6 +77,12 @@ int Window::get_window_exit()
 {
 	return exit;
 }
+
+void Window::set_camera(Camera* cam)
+{
+	camera = cam;
+}
+
 
 //register the window class
 int Window::register_wndclass()
@@ -106,7 +119,8 @@ int Window::create_window( const TCHAR* title)
 
 	ShowWindow(hwnd, SW_NORMAL);
 	window_messages();
-
+	win_width = width;
+	win_height = height;
 	return 0;
 }
 
@@ -155,7 +169,7 @@ int Window::create_frame(int w, int h, HWND hwnd)
 	
 	buffer = (unsigned int*)bi_ptr;//buffer is assigned to the new created bitmap
 	memset(buffer, 0, w * h);
-	frame->set_framebuffer(buffer);
+	frame->init_framebuffer(buffer);
 }
 
 
@@ -165,21 +179,56 @@ LRESULT CALLBACK Window::window_procedure(HWND hWnd, UINT msg,
 {
 	switch (msg) 
 	{
-		case WM_CLOSE:
-			exit = 1; 
-			if (MessageBox(hwnd, "Really quit?", "Renderer", MB_OKCANCEL) == IDOK)
+		case WM_LBUTTONDOWN:
+		{
+			prev_pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+			break;
+		}
+		case WM_MOUSEMOVE:
+		{
+			POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+			if (DragDetect(hWnd, pt))
 			{
-				DestroyWindow(hwnd);
+				handle_mouse_drag(pt);
 			}
 			break;
+		}
+		case WM_CLOSE:
+		{
+			handle_close_button(hWnd);
+			break;
+		}
 		case WM_DESTROY:
+		{
 			PostQuitMessage(0);
 			return 0;
+		}
 		//add mouse clicking event here
-		default: return DefWindowProc(hWnd, msg, wParam, lParam);
+		default:
+		{
+			return DefWindowProc(hWnd, msg, wParam, lParam);
+		}
 	}
 	return 0;
 }
+
+void Window::handle_mouse_drag(POINT curr_pt)
+{
+
+	float dist = 2*(prev_pt.x- curr_pt.x)/(float)win_width;
+	camera->orbit_horizontal(dist);
+	prev_pt = curr_pt;
+}
+
+void Window::handle_close_button(HWND hWnd)
+{
+	exit = 1;
+	if (MessageBox(hWnd, "Really quit?", "Renderer", MB_OKCANCEL) == IDOK)
+	{
+		DestroyWindow(hWnd);
+	}
+}
+
 
 void Window::window_messages(void) {
 	MSG msg;

@@ -28,7 +28,7 @@ public:
 
 	void move(float3 dir);
 	void pan_horizontal(float theta);
-	void pan_vertical(float theta);
+	void orbit_horizontal(float angle);
 	void auto_orbit_horizontal(float unit_angle);
 	
 	void reset();

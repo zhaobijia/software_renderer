@@ -17,12 +17,13 @@ public:
 	int get_width();
 	int get_height();
 	unsigned int* get_framebuffer();
-	void set_framebuffer(unsigned int* buffer);
+	void init_framebuffer(unsigned int* buffer);
 	void set_pixel(int x, int y, Color color);
 	void set_line(int x0, int y0, int x1, int y1, Color color);
 	void set_triangle(float3* tri, Color color);
 	void wireframe(Mesh* mesh);
 	void flat_shading(Mesh* mesh, float4x4 mvp);
+	void clear_buffers();
 	friend std::ostream& operator<<(std::ostream& out, const Frame& f);
 };
 

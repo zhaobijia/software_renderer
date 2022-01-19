@@ -5,43 +5,42 @@
 
 Frame::Frame():width(100),height(100)
 {
-	framebuffer = new unsigned int[width * height]{};
 	zbuffer = new float[width * height]{};
-	rasterizer = new Rasterizer(width, height, framebuffer,zbuffer);
 }
 
 Frame::Frame(int w, int h) : width(w), height(h)
 {
-	framebuffer = new unsigned int[width * height]{};
 	zbuffer = new float[width * height]{};
-	rasterizer = new Rasterizer(width, height, framebuffer,zbuffer);
 }
 Frame::~Frame()
 {
-	delete[] framebuffer;
 	delete[] zbuffer;
 }
 void Frame::set_pixel(int x, int y, Color color)
 {
+	assert(rasterizer);
 	rasterizer->draw_pixel(x, y, color);
 }
 void Frame::set_line(int x0, int y0, int x1, int y1, Color color)
 {
+	assert(rasterizer);
 	rasterizer->draw_line(x0, y0, x1, y1, color);
 }
 void Frame::set_triangle(float3* tri, Color color)
 {
-
+	assert(rasterizer);
 	rasterizer->draw_triangle(tri, color);
 
 }
 void Frame::wireframe(Mesh* mesh)
 {
+	assert(rasterizer);
 	rasterizer->draw_wireframe(mesh);
 }
 
 void Frame::flat_shading(Mesh* mesh, float4x4 mvp)
 {
+	assert(rasterizer);
 	rasterizer->draw_flat_shading(mesh,mvp);
 }
 
@@ -50,10 +49,10 @@ unsigned int* Frame::get_framebuffer()
 	return framebuffer;
 }
 
-void Frame::set_framebuffer(unsigned int* buffer)
+void Frame::init_framebuffer(unsigned int* buffer)
 {
-	framebuffer = buffer;//point to buffer
-	rasterizer->update_framebuffer(buffer);
+	framebuffer = buffer;//point to buffer passed in
+	rasterizer = new Rasterizer(width, height, framebuffer, zbuffer);
 }
 
 int Frame::get_width()
@@ -65,15 +64,13 @@ int Frame::get_height()
 	return height;
 }
 
-
-std::ostream& operator<<(std::ostream& out, const Frame& f)
+void Frame::clear_buffers()
 {
-	for (int i = 0; i < f.height; i++)
+	for (int i = 0; i < width * height; i++)
 	{
-		for (int j = 0; j < f.width; j++)
-		{
-			out << f.framebuffer[i * f.width + j] << ", ";
-		}
+		framebuffer[i] = 0;
+		zbuffer[i] = std::numeric_limits<float>::min();
 	}
-	return out;
 }
+
+
