@@ -75,27 +75,33 @@ void Camera::pan_horizontal(float theta)
 	lookat = rotate * lookat;
 }
 
-void Camera::orbit_horizontal(float screen_dist)
+void Camera::orbit_around_target(float2 screen_dist)
 {
-
 	float3 target_to_cam = position - target;
 	float4x4 rotate;
-	rotate = rotate.rotate_round(screen_dist, float3(0, 1, 0));
+	float3 right = lookat.cross(up);
+	rotate = rotate.rotate_round(screen_dist.x, up);// 
+	target_to_cam = rotate * target_to_cam;
+	rotate = rotate.rotate_round(screen_dist.y, right);
 	target_to_cam = rotate * target_to_cam;
 	//update position
 	position = target + target_to_cam;
 	//update looking angle
 	lookat = (target - position).normalize();
+	up = right.cross(lookat).normalize();
 }
 
 void Camera::auto_orbit_horizontal(float unit_angle)
 {
 	float3 target_to_cam = position - target;
+	float3 right = lookat.cross(up);
 	float4x4 rotate;
 	rotate = rotate.rotate_round(unit_angle, float3(0,1,0));
 	target_to_cam = rotate * target_to_cam;
 	//update position
 	position = target + target_to_cam;
+	lookat = (target - position).normalize();
+	up = right.cross(lookat).normalize();
 }
 
 void Camera::reset()

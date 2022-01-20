@@ -170,6 +170,7 @@ int Window::create_frame(int w, int h, HWND hwnd)
 	buffer = (unsigned int*)bi_ptr;//buffer is assigned to the new created bitmap
 	memset(buffer, 0, w * h);
 	frame->init_framebuffer(buffer);
+
 }
 
 
@@ -203,9 +204,9 @@ LRESULT CALLBACK Window::window_procedure(HWND hWnd, UINT msg,
 			PostQuitMessage(0);
 			return 0;
 		}
-		//add mouse clicking event here
 		default:
 		{
+
 			return DefWindowProc(hWnd, msg, wParam, lParam);
 		}
 	}
@@ -215,8 +216,8 @@ LRESULT CALLBACK Window::window_procedure(HWND hWnd, UINT msg,
 void Window::handle_mouse_drag(POINT curr_pt)
 {
 
-	float dist = 2*(prev_pt.x- curr_pt.x)/(float)win_width;
-	camera->orbit_horizontal(dist);
+	float2 dist = float2(2*(prev_pt.x- curr_pt.x)/(float)win_width , 2 * (prev_pt.y - curr_pt.y) / (float)win_height);
+	camera->orbit_around_target(dist);
 	prev_pt = curr_pt;
 }
 
@@ -228,6 +229,7 @@ void Window::handle_close_button(HWND hWnd)
 		DestroyWindow(hWnd);
 	}
 }
+
 
 
 void Window::window_messages(void) {

@@ -2,6 +2,7 @@
 #include "window.h"
 #include "mesh.h"
 #include "camera.h"
+#include "timer.h"
 
 int main()
 {	
@@ -29,11 +30,19 @@ int main()
 	window.frame->flat_shading(&mesh, mvp);
 	
 	while (window.get_window_exit() == 0) {
+		clock_t start = clock();
+
 		window.window_messages();
 		window.frame->clear_buffers();
+		cam.auto_orbit_horizontal(0.01f);
 		mvp = mvp.set_mvp(float3(0, 0, -2), cam.position, cam.lookat, cam.up, -1, 1, -1, 1, -100, -1);
 		window.frame->flat_shading(&mesh, mvp);
 		window.window_update();
+
+		clock_t end = clock();
+		double frame_time = clock_to_milliseconds(end - start);
+
+
 		Sleep(1);
 	}
 	

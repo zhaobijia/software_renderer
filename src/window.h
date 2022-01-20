@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <windowsx.h>
 #include <tchar.h>
+#include "maths.h"
 #include "frame.h"
 #include "texture.h"
 #include "camera.h"
@@ -40,6 +41,7 @@ public:
 	static LRESULT CALLBACK window_procedure(HWND, UINT, WPARAM, LPARAM);
 	static void handle_mouse_drag(POINT curr);
 	static void handle_close_button(HWND hWnd);
+	static void handle_default();
 };
 
 #endif //__WINDOW_H__
