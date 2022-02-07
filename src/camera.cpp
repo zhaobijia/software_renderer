@@ -9,7 +9,7 @@ Camera::Camera()
 	fov = M_PI;
 
 	near_plane = -1;
-	far_plane = -1000;
+	far_plane = -100;
 	left = -1;
 	right = 1;
 	bottom = -1;
@@ -21,7 +21,7 @@ Camera::Camera(float3 _position, float3 _lookat, float3 _up):position(_position)
 {
 	fov = M_PI;
 	near_plane = -1;
-	far_plane = -1000;
+	far_plane = -100;
 	left = -1;
 	right = 1;
 	bottom = -1;

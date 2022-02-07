@@ -7,9 +7,10 @@ class Texture
 private:
 	int width, height;
 	int bpp; //8-bit component per pixel for stb lib to load image
-	unsigned int* loaded_texture;
-	Color* loaded_texture_color;
+	unsigned int* loaded_texture = NULL;
+	Color* loaded_texture_color = NULL;
 public:
+
 	Texture(const char* filename);
 	Texture(const char* filename, int& w, int& h);
 	~Texture();

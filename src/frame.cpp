@@ -29,20 +29,22 @@ void Frame::set_line(int x0, int y0, int x1, int y1, Color color)
 void Frame::set_triangle(float3* tri, Color color)
 {
 	assert(rasterizer);
-	rasterizer->draw_triangle(tri, color);
+
+	//rasterizer->draw_triangle(tri, color);
 
 }
-void Frame::wireframe(Mesh* mesh)
+void Frame::wireframe(Mesh& mesh, float4x4 mvp)
 {
 	assert(rasterizer);
-	rasterizer->draw_wireframe(mesh);
+	rasterizer->draw_wireframe(mesh, mvp);
 }
 
-void Frame::flat_shading(Mesh* mesh, float4x4 mvp)
+void Frame::rasterize(Scene& scene, IShader& shader)
 {
 	assert(rasterizer);
-	rasterizer->draw_flat_shading(mesh,mvp);
+	rasterizer->rasterize(scene, shader);
 }
+
 
 unsigned int* Frame::get_framebuffer()
 {

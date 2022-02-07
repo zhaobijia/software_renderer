@@ -63,6 +63,7 @@ Texture::Texture(const char* filename) :width(0), height(0), bpp(0)
 
 Texture::~Texture()
 {
+
 	delete[] loaded_texture;
 	delete[] loaded_texture_color;
 }

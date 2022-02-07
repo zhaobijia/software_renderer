@@ -4,13 +4,10 @@
 
 class Camera
 {
-private:
+public:
 	float fov; //the angle between view frustum's upper plane and bottom plane in randians.
 	float near_plane, far_plane;
 	float left, right, bottom, top;
-	//TODO: shadow buffer
-
-public:
 	float3 position;
 	float3 lookat;
 	float3 up;

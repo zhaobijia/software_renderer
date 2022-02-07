@@ -1,7 +1,11 @@
+#ifndef __RASTERIZER_H__
+#define __RASTERIZER_H__
 #include "maths.h"
 #include "utils.h"
 #include "mesh.h"
 #include "texture.h"
+#include "shader.h"
+#include "scene.h"
 
 #define WHITE Color(255,255,255)
 #define RED Color(255,0,0)
@@ -17,8 +21,8 @@ class Rasterizer
 {
 private:
 	int width, height;
-	unsigned int* framebuffer;
-	float* zbuffer;
+	unsigned int* framebuffer = NULL;
+	float* zbuffer = NULL;
 
 public:
 	Rasterizer(int w, int h, unsigned int* fb, float* zb);
@@ -35,11 +39,13 @@ public:
 	box_t bounding_box(float2 p0, float2 p1, float2 p2);
 	float3 barycentric(float3 pt, float3 t0, float3 t1, float3 t2);
 
-	void draw_triangle(float3* tri, Color color);
-	void draw_textured_triangle(float3* tri, int2* uv, Texture* texture, float intensity);
-	void draw_wireframe(Mesh* mesh);
-	void draw_flat_shading(Mesh* mesh, float4x4 mvp);
+	void draw_triangle(float3* tri, float intensity, IShader& shader);
+	void draw_textured_triangle(float3* tri, int2* uv, Texture* texture, float intensity, IShader& shader);
+	void draw_wireframe(Mesh& mesh, float4x4 mvp);
+	//void draw_flat_shading(Mesh* mesh, float4x4 mvp);
+	void rasterize(Scene& scene, IShader& shader);
 	void simple_clipping(int h, int w, int* x, int* y);
 };
 
 
+#endif //__RASTERIZER_H__

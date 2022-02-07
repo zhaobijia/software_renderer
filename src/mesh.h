@@ -15,7 +15,8 @@ private:
 	std::vector<int3> uv_faces;
 	std::vector<int3> norm_faces;
 
-	Texture* diffuse_texture;
+	Texture* diffuse_texture = NULL;
+	bool has_diffuse = false;
 	
 public:
 	Mesh();

@@ -1,42 +1,38 @@
 ﻿#include <iostream>
 #include "window.h"
-#include "mesh.h"
-#include "camera.h"
+#include "scene.h"
+#include "shader.h"
 #include "timer.h"
 
 int main()
 {	
-	//load mesh
-	Mesh mesh;
-	mesh.read_obj_from_file("assets/african_head.obj");
-	Texture texture("assets/african_head_diffuse.tga");
-	mesh.set_diffuse_texture(&texture);
-	
-	//set camera
-	Camera cam(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0));
-	cam.set_target(float3(0, 0, -2));
-	//set mvp 
-	float4x4 mvp;
-	mvp = mvp.set_mvp(float3(0,0,-2), cam.position, cam.lookat, cam.up, -1,1,-1,1,-100,-1);
-	
+
+	Scene sample_scene;
+	sample_scene.init();
+
+	//Set shader
+	FlatShader shader;
+	shader.mvp = sample_scene.mvp;
 	TCHAR* title = _T("software_renderer");
 		
 	Window window(800,800);
-	window.set_camera(&cam);
+	window.set_camera(&(sample_scene.cam));
 
 	if (window.initialize_window(title))
 		return -1;
 
-	window.frame->flat_shading(&mesh, mvp);
+	window.frame->rasterize(sample_scene, shader);
 	
 	while (window.get_window_exit() == 0) {
 		clock_t start = clock();
 
 		window.window_messages();
 		window.frame->clear_buffers();
-		cam.auto_orbit_horizontal(0.01f);
-		mvp = mvp.set_mvp(float3(0, 0, -2), cam.position, cam.lookat, cam.up, -1, 1, -1, 1, -100, -1);
-		window.frame->flat_shading(&mesh, mvp);
+		//update:
+		sample_scene.update();
+		shader.mvp = sample_scene.mvp;
+
+		window.frame->rasterize(sample_scene, shader);
 		window.window_update();
 
 		clock_t end = clock();

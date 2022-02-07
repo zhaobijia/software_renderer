@@ -176,7 +176,7 @@ public:
 				rv[i] += m[i][j] * v_arr[j];
 			}
 		}
-		assert(rv[3] != 0);
+		rv[3] = rv[3] == 0 ? 0.001 : rv[3];
 		return Vector3<T>(rv[0]/rv[3], rv[1] / rv[3], rv[2] / rv[3]);
 	}
 
