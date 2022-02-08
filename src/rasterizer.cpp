@@ -179,7 +179,7 @@ float3 Rasterizer::barycentric(float3 pt, float3 t0, float3 t1, float3 t2)
 }
 
 
-void Rasterizer::draw_triangle(float3* tri, float intensity, IShader& shader)
+void Rasterizer::draw_triangle(float3* tri, IShader& shader)
 {
     float2 pt0(tri[0].x, tri[0].y);
     float2 pt1(tri[1].x, tri[1].y);
@@ -199,7 +199,7 @@ void Rasterizer::draw_triangle(float3* tri, float intensity, IShader& shader)
                 if (pt.z > get_zbuffer_value(i, j))
                 {
        
-                    Color color = shader.fragment(bary, Color(intensity*255, intensity*255, intensity*255));
+                    Color color = shader.fragment(bary, Color(255, 255, 255));
 
                     set_zbuffer_value(i, j, pt.z);
                     draw_pixel(i, j, color);
@@ -211,7 +211,7 @@ void Rasterizer::draw_triangle(float3* tri, float intensity, IShader& shader)
     
 }
 
-void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map, float intensity, IShader& shader)
+void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map, IShader& shader)
 {
     float2 pt0(tri[0].x, tri[0].y);
     float2 pt1(tri[1].x, tri[1].y);
@@ -235,12 +235,11 @@ void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map, 
                 float3 pt = tri[0] + (tri[1] - tri[0]) * bary.x + (tri[2] - tri[0]) * bary.y;
                 int2 uv_coord = uv[0] + (uv[1] - uv[0]) * bary.x + (uv[2] - uv[0]) * bary.y;
 
-                Color color = texture[uv_coord.y * texture_width + uv_coord.x] * intensity;
-                
-                
+                Color tex_color = texture[uv_coord.y * texture_width + uv_coord.x];
+                       
                 if (pt.z > get_zbuffer_value(i, j))
                 {
-                    
+                    Color color = shader.fragment(bary, tex_color);
                     //update z buffer
 
                     set_zbuffer_value(i, j, pt.z);
@@ -259,14 +258,13 @@ void Rasterizer::draw_wireframe(Mesh& mesh, float4x4 mvp)
     //for each face(triangle vertex group) in mesh
     for (int i = 0; i < mesh.face_count(); i++)
     {
-        int3 f = mesh.get_pos_idx(i);
+
         float3 verts[3];
-        verts[0] = mesh.get_vertex(f.x);
-        verts[1] = mesh.get_vertex(f.y);
-        verts[2] = mesh.get_vertex(f.z);
+
 
         for (int j = 0; j < 3; j++)
         {
+            verts[j] = mesh.get_vertex_with_face_idx(i, j);
             float3 p0 = mvp*verts[j];
             float3 p1 = mvp*verts[(j + 1) % 3];
 
@@ -282,116 +280,56 @@ void Rasterizer::draw_wireframe(Mesh& mesh, float4x4 mvp)
     }
 }
 
-//void Rasterizer::draw_flat_shading(Mesh* mesh, float4x4 mvp)
-//{
-//    for (int i = 0; i < mesh->face_count(); i++)
-//    {
-//        int3 pos_idx = mesh->get_pos_idx(i);
-//        //vertex of a triangle
-//        float3 verts[3];
-//        verts[0] = mesh->get_vertex(pos_idx.x);
-//        verts[1] = mesh->get_vertex(pos_idx.y);
-//        verts[2] = mesh->get_vertex(pos_idx.z);
-//
-//        //screen coords(change to float3 b/c adding zbuffer)
-//        float3 screen[3];
-//        for (int i = 0; i < 3; i++)
-//        {
-//
-//            verts[i] = mvp * verts[i];
-//            //temporary enlarge z so that z buffer can have a better accuracy
-//            screen[i] = float3((verts[i].x + 1.f) * width / 2.f, (verts[i].y + 1.f) * height / 2.f, (verts[i].z + 1.f) * height / 2.f );
-//
-//           
-//        }
-//
-//        
-//        //normal of this triangle
-//        float3 normal = ((verts[2] - verts[0]).cross(verts[1] - verts[0])).normalize();
-//
-//        //temporary light source:
-//        float3 _light(0, 0, -1);
-//
-//        float intensity = _light.dot(normal);
-//
-//        if (intensity > 0)
-//        {
-//            //load texture
-//            if (mesh->has_diffuse_texture())
-//            {
-//                int3 uv_idx = mesh->get_uv_idx(i);
-//                int2 uvs[3];
-//                uvs[0] = mesh->get_uv_coord(uv_idx.x);
-//                uvs[1] = mesh->get_uv_coord(uv_idx.y);
-//                uvs[2] = mesh->get_uv_coord(uv_idx.z);
-//
-//                Texture* uv_map = mesh->get_diffuse_texture();
-//                draw_textured_triangle(screen, uvs, uv_map, intensity);
-//
-//            }
-//            else
-//            {
-//
-//                draw_triangle(screen, Color(255 * intensity, 255 * intensity, 255 * intensity));
-//
-//            }
-//        }
-//        
-//    }
-//}
 
 void Rasterizer::rasterize(Scene& scene, IShader& shader)
 {
     for (int i = 0; i < scene.mesh.face_count(); i++)
     {
-        int3 pos_idx = scene.mesh.get_pos_idx(i);
         //the 3 vertices of a triangle
-        float3 verts[3];
-        verts[0] = scene.mesh.get_vertex(pos_idx.x);
-        verts[1] = scene.mesh.get_vertex(pos_idx.y);
-        verts[2] = scene.mesh.get_vertex(pos_idx.z);
+        float3 verts[3], normals[3];
 
+        //calculate normal if normal is not provided in the model
+        //float3 normal = ((verts[2] - verts[0]).cross(verts[1] - verts[0])).normalize();
         //screen coordinates(change to float3 b/c adding zbuffer)
         float3 screen_coord[3];
-        for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
         {
+            verts[j] = scene.mesh.get_vertex_with_face_idx(i, j);
+            normals[j] = scene.mesh.get_normal_with_face_idx(i, j);
+           // std::cout << "normals : "<<normals[j] << std::endl;
             //vertex shader applies:
-            verts[i] = shader.vertex(verts[i]);// mvp* verts[i];
+
+            verts[j] = shader.vertex(j, verts[j], normals[j], scene.light);
+
             //temporary enlarge z so that z buffer can have a better accuracy
-            screen_coord[i] = float3((verts[i].x + 1.f) * width / 2.f, (verts[i].y + 1.f) * height / 2.f, (verts[i].z + 1.f) * height / 2.f);
+            screen_coord[j] = float3((verts[j].x + 1.f) * width / 2.f, (verts[j].y + 1.f) * height / 2.f, (verts[j].z + 1.f) * height / 2.f);
         }
 
+        float3 screen_normal = ((screen_coord[2] - screen_coord[0]).cross(screen_coord[1] - screen_coord[0])).normalize();
+        bool backface = screen_normal.dot(scene.light.direction);
 
-        //normal of this triangle
-        float3 normal = ((verts[2] - verts[0]).cross(verts[1] - verts[0])).normalize();
-
-        //temporary light source:
-        float3 _light(0, 0, -1);
-
-        float intensity = _light.dot(normal);
-
-        if (intensity > 0)
+        if (backface)
         {
             //load texture
             if (scene.mesh.has_diffuse_texture())
             {
-                int3 uv_idx = scene.mesh.get_uv_idx(i);
                 int2 uvs[3];
-                uvs[0] = scene.mesh.get_uv_coord(uv_idx.x);
-                uvs[1] = scene.mesh.get_uv_coord(uv_idx.y);
-                uvs[2] = scene.mesh.get_uv_coord(uv_idx.z);
-
+                for (int j = 0; j < 3; j++)
+                {
+                    uvs[j] = scene.mesh.get_uv_with_face_idx(i, j);
+                }
                 Texture* uv_map = scene.mesh.get_diffuse_texture();
-                draw_textured_triangle(screen_coord, uvs, uv_map, intensity, shader);
+                draw_textured_triangle(screen_coord, uvs, uv_map, shader);
 
             }
             else
             {
 
-                draw_triangle(screen_coord, intensity, shader);
+                draw_triangle(screen_coord, shader);
 
             }
         }
 
     }
 }
+

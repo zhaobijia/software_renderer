@@ -39,8 +39,8 @@ public:
 	box_t bounding_box(float2 p0, float2 p1, float2 p2);
 	float3 barycentric(float3 pt, float3 t0, float3 t1, float3 t2);
 
-	void draw_triangle(float3* tri, float intensity, IShader& shader);
-	void draw_textured_triangle(float3* tri, int2* uv, Texture* texture, float intensity, IShader& shader);
+	void draw_triangle(float3* tri, IShader& shader);
+	void draw_textured_triangle(float3* tri, int2* uv, Texture* texture, IShader& shader);
 	void draw_wireframe(Mesh& mesh, float4x4 mvp);
 	//void draw_flat_shading(Mesh* mesh, float4x4 mvp);
 	void rasterize(Scene& scene, IShader& shader);

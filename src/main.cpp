@@ -11,8 +11,8 @@ int main()
 	sample_scene.init();
 
 	//Set shader
-	FlatShader shader;
-	shader.mvp = sample_scene.mvp;
+	GouraudShader shader;
+	shader._mvp = sample_scene.mvp;
 	TCHAR* title = _T("software_renderer");
 		
 	Window window(800,800);
@@ -30,8 +30,7 @@ int main()
 		window.frame->clear_buffers();
 		//update:
 		sample_scene.update();
-		shader.mvp = sample_scene.mvp;
-
+		shader._mvp = sample_scene.mvp;
 		window.frame->rasterize(sample_scene, shader);
 		window.window_update();
 
