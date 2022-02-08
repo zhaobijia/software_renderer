@@ -10,7 +10,7 @@ It is an ongoing learning project inspired by [tinyrenderer](https://github.com/
 - Image loading using [stb-image](https://github.com/nothings/stb/blob/master/stb_image.h)
 - Orbiting camera controls
 - Wavefront obj file parser
-- Z-Buffer
+- Reverse Z-Buffering
 - Back-face Culling
 - Perspective projection
 - Texture mapping
@@ -19,7 +19,6 @@ It is an ongoing learning project inspired by [tinyrenderer](https://github.com/
 ### In progress (Todo/Wishlist <3 ):
 - Scene switching
 - Lighting (directional/point/spotlight)
-- Reverse Z-Buffering
 - Homogeneous clipping
 - View Frustum culling
 - Shadow mapping

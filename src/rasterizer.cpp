@@ -179,7 +179,7 @@ float3 Rasterizer::barycentric(float3 pt, float3 t0, float3 t1, float3 t2)
 }
 
 
-void Rasterizer::draw_triangle(float3* tri, IShader& shader)
+void Rasterizer::draw_triangle(float3* tri, IShader& shader, Scene& scene)
 {
     float2 pt0(tri[0].x, tri[0].y);
     float2 pt1(tri[1].x, tri[1].y);
@@ -196,9 +196,9 @@ void Rasterizer::draw_triangle(float3* tri, IShader& shader)
             if (bary.x >= 0 - EPS && bary.y >= 0 - EPS && (bary.x + bary.y) <= 1.f + EPS)
             {
                 float3 pt = tri[0] + (tri[1] - tri[0]) * bary.x + (tri[2] - tri[0]) * bary.y;
+                pt.z = reverse_depth(pt.z, scene.cam.near_plane, scene.cam.far_plane);
                 if (pt.z > get_zbuffer_value(i, j))
-                {
-       
+                {     
                     Color color = shader.fragment(bary, Color(255, 255, 255));
 
                     set_zbuffer_value(i, j, pt.z);
@@ -211,7 +211,7 @@ void Rasterizer::draw_triangle(float3* tri, IShader& shader)
     
 }
 
-void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map, IShader& shader)
+void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map, IShader& shader, Scene& scene)
 {
     float2 pt0(tri[0].x, tri[0].y);
     float2 pt1(tri[1].x, tri[1].y);
@@ -236,7 +236,7 @@ void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map, 
                 int2 uv_coord = uv[0] + (uv[1] - uv[0]) * bary.x + (uv[2] - uv[0]) * bary.y;
 
                 Color tex_color = texture[uv_coord.y * texture_width + uv_coord.x];
-                       
+                pt.z = reverse_depth(pt.z,scene.cam.near_plane, scene.cam.far_plane);
                 if (pt.z > get_zbuffer_value(i, j))
                 {
                     Color color = shader.fragment(bary, tex_color);
@@ -319,17 +319,24 @@ void Rasterizer::rasterize(Scene& scene, IShader& shader)
                     uvs[j] = scene.mesh.get_uv_with_face_idx(i, j);
                 }
                 Texture* uv_map = scene.mesh.get_diffuse_texture();
-                draw_textured_triangle(screen_coord, uvs, uv_map, shader);
+                draw_textured_triangle(screen_coord, uvs, uv_map, shader, scene);
 
             }
             else
             {
 
-                draw_triangle(screen_coord, shader);
+                draw_triangle(screen_coord, shader, scene);
 
             }
         }
 
     }
+}
+
+//reference: https://learnopengl.com/Advanced-OpenGL/Depth-testing
+float Rasterizer::reverse_depth(float depth, float near, float far)
+{
+    float z = depth * 2.f - 1.f;
+    return  z+ 2.f * near * far/(far-near);
 }
 
