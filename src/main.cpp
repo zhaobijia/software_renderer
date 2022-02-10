@@ -11,8 +11,9 @@ int main()
 	sample_scene.init();
 
 	//Set shader
-	GouraudShader shader;
+	PhongShader shader;
 	shader._mvp = sample_scene.mvp;
+	shader._cam_pos = sample_scene.cam.position;
 	TCHAR* title = _T("software_renderer");
 		
 	Window window(800,800);
@@ -30,7 +31,10 @@ int main()
 		window.frame->clear_buffers();
 		//update:
 		sample_scene.update();
+		//update shader:
 		shader._mvp = sample_scene.mvp;
+		shader._cam_pos = sample_scene.cam.position;
+
 		window.frame->rasterize(sample_scene, shader);
 		window.window_update();
 

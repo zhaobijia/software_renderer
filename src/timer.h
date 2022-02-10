@@ -1,3 +1,5 @@
+#ifndef __TIMER_H__
+#define __TIMER_H__
 //reference on measure frame time in millisecond
 //https://stackoverflow.com/questions/28530798/how-to-make-a-basic-fps-counter
 
@@ -12,3 +14,5 @@ float average_frame_time(float time, int frame)
 {
 	return time / frame;
 }
+
+#endif

@@ -20,17 +20,17 @@ It is an ongoing learning project inspired by [tinyrenderer](https://github.com/
 - Scene switching
 - Lighting (directional/point/spotlight)
 - Homogeneous clipping
-- View Frustum culling
 - Shadow mapping
 - Ambient occlusion
 - Metallic workflow
 - PBR (Physically based rendering)
 - IBL (Image-based lighting)
 - Reflections using cubemaps
+- View frustum culling 
 - Antialiasing
-- Skeletal Animation
-- Particle system
-- Post-processing
+- Skeletal Animation (maybe)
+- Particle system (maybe)
+- Post-processing (maybe)
 
 ### References:
 - [Tiny renderer](https://github.com/ssloy/tinyrenderer)
