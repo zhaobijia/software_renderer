@@ -296,13 +296,14 @@ void Rasterizer::rasterize(Scene& scene, IShader& shader)
         {
             verts[j] = scene.mesh.get_vertex_with_face_idx(i, j);
             normals[j] = scene.mesh.get_normal_with_face_idx(i, j);
-           // std::cout << "normals : "<<normals[j] << std::endl;
+
             //vertex shader applies:
 
             verts[j] = shader.vertex(j, verts[j], normals[j], scene.light);
 
             //temporary enlarge z so that z buffer can have a better accuracy
             screen_coord[j] = float3((verts[j].x + 1.f) * width / 2.f, (verts[j].y + 1.f) * height / 2.f, (verts[j].z + 1.f) * height / 2.f);
+
         }
 
         float3 screen_normal = ((screen_coord[2] - screen_coord[0]).cross(screen_coord[1] - screen_coord[0])).normalize();

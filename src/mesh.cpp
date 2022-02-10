@@ -12,7 +12,6 @@ Mesh::~Mesh()
 
 void Mesh::read_obj_from_file(const char* filename)
 {
-	
 	std::ifstream file;
 	file.open(filename, std::ifstream::in);
 	if (file.fail())
@@ -73,6 +72,7 @@ void Mesh::read_obj_from_file(const char* filename)
 	std::cout << "uv faces:" << uv_faces.size() << ",";
 	std::cout << "normal faces:" << norm_faces.size() << ",";
 
+
 }
 void Mesh::set_diffuse_texture(Texture* texture)
 {
@@ -114,17 +114,21 @@ float3 Mesh::get_normal(int idx)
 
 std::vector<int> Mesh::get_pos_idx(int idx)
 {
+
 	return vert_faces[idx];
 }
 
 std::vector<int> Mesh::get_uv_idx(int idx)
 {
+
 	return uv_faces[idx];
 }
 
 std::vector<int> Mesh::get_normal_idx(int idx)
 {
+
 	return norm_faces[idx];
+	
 }
 Texture* Mesh::get_diffuse_texture()
 {
@@ -134,6 +138,7 @@ Texture* Mesh::get_diffuse_texture()
 float3 Mesh::get_vertex_with_face_idx(int f_idx, int v_idx)
 {
 	std::vector<int> pos_idx = get_pos_idx(f_idx);
+
 	float3 vert = get_vertex(pos_idx[v_idx]);
 
 	return vert;
@@ -148,7 +153,6 @@ int2 Mesh::get_uv_with_face_idx(int f_idx, int u_idx)
 float3 Mesh::get_normal_with_face_idx(int f_idx, int n_idx)
 {
 	std::vector<int> norm_idx = get_normal_idx(f_idx);
-	float3 norm = get_vertex(norm_idx[n_idx]);
-
+	float3 norm = get_normal(norm_idx[n_idx]);
 	return norm;
 }

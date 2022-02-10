@@ -118,12 +118,17 @@ struct PhongShader : IShader
 
 	virtual float3 vertex(int v_idx, float3 vertex, float3 normal, ILight light)
 	{
+		_light = light;
+		float3 pos = _mvp * light.position;
+		float3 pos_dir = light.position + light.direction;
+		_light.direction = _mvp * pos_dir - pos;
+
 		_normal = (_mvp * normal);// .normalize();
-		float intensity = -light.direction.dot(_normal);
+		float intensity = (_light.direction*-1).dot(_normal);
 		_varying_intensity[v_idx] = std::max(0.0f, intensity);
 		_varying_pos[v_idx] = vertex;
 		_varying_normals[v_idx] = _normal;
-		_light = light;
+
 		_ambient = _light.color;
 		_diffuse = _light.color;
 		_specular = _light.color;
@@ -144,10 +149,10 @@ struct PhongShader : IShader
 		float3 normal = _varying_normals[0] + (_varying_normals[1] - _varying_normals[0]) * bary.x + (_varying_normals[2] - _varying_normals[0]) * bary.y;
 		float3 view_dir = (_cam_pos-pos).normalize();
 		float3 reflect_dir = reflect(_light.direction, normal).normalize();
-		_specular_intensity = std::max(view_dir.dot(reflect_dir), 0.f);
+		_specular_intensity =std::pow( std::max(view_dir.dot(reflect_dir), 0.f),32);
 		Color specular = _specular * _specular_intensity;
 
-		return (diffuse + ambient+specular )*color;
+		return (diffuse + ambient + specular)*color;
 	}
 };
 

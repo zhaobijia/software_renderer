@@ -14,7 +14,7 @@ void Scene::init()
 	//--> todo: change to reading scene config file
 	load_mesh("african_head.obj");
 	load_texture("assets/african_head_diffuse.tga");
-	set_directional_light(float3(0,0,0),float3(0, 0, -1), WHITE);
+	set_directional_light(float3(0,0,0),float3(-1, -1, -1), WHITE);
 	set_camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), float3(0, 0, -1.8));
 	calculate_mvp();
 }
@@ -23,6 +23,7 @@ void Scene::update()
 	//default orbit cam
 	cam.auto_orbit_horizontal(0.01f);
 	mvp = mvp.set_mvp(cam.target, cam.position, cam.lookat, cam.up, cam.left, cam.right, cam.bottom, cam.top, cam.far_plane, cam.near_plane);
+
 }
 
 void Scene::load_mesh(const char* filename)
