@@ -298,11 +298,8 @@ void Rasterizer::rasterize(Scene& scene, IShader& shader)
             normals[j] = scene.mesh.get_normal_with_face_idx(i, j);
 
             //vertex shader applies:
-
-            verts[j] = shader.vertex(j, verts[j], normals[j], scene.light);
-
-            //temporary enlarge z so that z buffer can have a better accuracy
-            screen_coord[j] = float3((verts[j].x + 1.f) * width / 2.f, (verts[j].y + 1.f) * height / 2.f, (verts[j].z + 1.f) * height / 2.f);
+            verts[j]= shader.vertex(j, verts[j], normals[j]);
+            screen_coord[j] = scene.viewport_matrix * verts[j];
 
         }
 

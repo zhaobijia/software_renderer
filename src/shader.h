@@ -9,7 +9,7 @@ struct IShader
 {
 	virtual ~IShader() {};
 	//The main goal of the vertex shader is to transform the coordinates of the vertices. The secondary goal is to prepare data for the fragment shader
-	virtual float3 vertex(int nthvert, float3 vertex, float3 normal, ILight light) = 0;
+	virtual float3 vertex(int nthvert, float3 vertex, float3 normal) = 0;
 	//The main goal of the fragment shader is to determine the color of the current pixel.
 	virtual Color fragment(float3 barycentric, Color color) = 0;
 };
@@ -69,11 +69,11 @@ struct ToonShader : IShader
 	float3 _varying_normals[3];
 	ILight _light;
 
-	virtual float3 vertex(int v_idx, float3 vertex, float3 normal, ILight light)
+	virtual float3 vertex(int v_idx, float3 vertex, float3 normal)
 	{
 		_normal = (_mvp * normal);// .normalize();
 		_varying_normals[v_idx] = _normal;
-		_light = light;
+
 		return _mvp * vertex;
 	}
 
@@ -116,23 +116,20 @@ struct PhongShader : IShader
 	float _specular_intensity;
 	Color _specular;
 
-	virtual float3 vertex(int v_idx, float3 vertex, float3 normal, ILight light)
+	virtual float3 vertex(int v_idx, float3 vertex, float3 normal)
 	{
-		_light = light;
-		float3 pos = _mvp * light.position;
-		float3 pos_dir = light.position + light.direction;
-		_light.direction = _mvp * pos_dir - pos;
 
 		_normal = (_mvp * normal);// .normalize();
 		float intensity = (_light.direction*-1).dot(_normal);
 		_varying_intensity[v_idx] = std::max(0.0f, intensity);
-		_varying_pos[v_idx] = vertex;
+		float3 v = _mvp * vertex;
+		_varying_pos[v_idx] = v;
 		_varying_normals[v_idx] = _normal;
 
 		_ambient = _light.color;
 		_diffuse = _light.color;
 		_specular = _light.color;
-		return _mvp * vertex;
+		return v;
 	}
 
 	virtual Color fragment(float3 bary, Color color)
@@ -146,16 +143,75 @@ struct PhongShader : IShader
 		Color diffuse =_diffuse* _diffuse_intensity;
 
 		float3 pos = _varying_pos[0] + (_varying_pos[1] - _varying_pos[0]) * bary.x + (_varying_pos[2] - _varying_pos[0]) * bary.y;
-		float3 normal = _varying_normals[0] + (_varying_normals[1] - _varying_normals[0]) * bary.x + (_varying_normals[2] - _varying_normals[0]) * bary.y;
+		float3 normal = (_varying_normals[0] + (_varying_normals[1] - _varying_normals[0]) * bary.x + (_varying_normals[2] - _varying_normals[0]) * bary.y).normalize();
 		float3 view_dir = (_cam_pos-pos).normalize();
-		float3 reflect_dir = reflect(_light.direction, normal).normalize();
-		_specular_intensity =std::pow( std::max(view_dir.dot(reflect_dir), 0.f),32);
-		Color specular = _specular * _specular_intensity;
+		float3 reflect_dir = reflect(_light.direction*-1, normal).normalize();
+		_specular_intensity =std::pow( std::max(view_dir.dot(reflect_dir), 0.f),32)*0.5;
+		Color specular = _specular* _specular_intensity;
 
-		return (diffuse + ambient + specular)*color;
+		return (diffuse + ambient + specular) *color;
 	}
 };
 
 //
+struct BlinnPhongShader: IShader
+{
+	float4x4 _mvp;
+	float3 _normal;
+	float _varying_intensity[3];
+	float3 _varying_pos[3];
+	float3 _varying_normals[3];
+	ILight _light;
+	float3 _cam_pos;
+
+	//phong light model
+	float _ambient_intensity;
+	Color _ambient;
+
+	float _diffuse_intensity;
+	Color _diffuse;
+
+	float _specular_intensity;
+	Color _specular;
+
+	virtual float3 vertex(int v_idx, float3 vertex, float3 normal)
+	{
+
+		_normal = (_mvp * normal);
+		float intensity = (_light.direction * -1).dot(_normal);
+		_varying_intensity[v_idx] = std::max(0.0f, intensity);
+		float3 v = _mvp * vertex;
+		_varying_pos[v_idx] = v;
+		_varying_normals[v_idx] = _normal;
+
+		_ambient = _light.color;
+		_diffuse = _light.color;
+		_specular = _light.color;
+		return v;
+	}
+
+	virtual Color fragment(float3 bary, Color color)
+	{
+
+		//lightings:
+		_ambient_intensity = 0.1f;
+		Color ambient = _ambient * _ambient_intensity;
+
+		_diffuse_intensity = _varying_intensity[0] + (_varying_intensity[1] - _varying_intensity[0]) * bary.x + (_varying_intensity[2] - _varying_intensity[0]) * bary.y;
+		Color diffuse = _diffuse * _diffuse_intensity;
+
+		float3 pos = _varying_pos[0] + (_varying_pos[1] - _varying_pos[0]) * bary.x + (_varying_pos[2] - _varying_pos[0]) * bary.y;
+		float3 normal = (_varying_normals[0] + (_varying_normals[1] - _varying_normals[0]) * bary.x + (_varying_normals[2] - _varying_normals[0]) * bary.y).normalize();
+		float3 view_dir = (_cam_pos - pos).normalize();
+		float3 light_dir = _light.direction.normalize()*-1;
+		float3 halfway_dir = (light_dir  + view_dir).normalize();
+		
+		_specular_intensity = std::pow(std::max((normal).dot(halfway_dir), 0.f), 32);
+
+		Color specular = _specular *_specular_intensity;
+
+		return (diffuse + ambient + specular) *color;
+	}
+};
 
 #endif

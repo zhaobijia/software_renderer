@@ -177,7 +177,10 @@ public:
 			}
 		}
 		rv[3] = rv[3] == 0 ? 0.001 : rv[3];
+		
 		return Vector3<T>(rv[0]/rv[3], rv[1] / rv[3], rv[2] / rv[3]);
+
+
 	}
 
 	
@@ -307,6 +310,8 @@ public:
 		rotate_matrix.m[2][1] = -g.y;
 		rotate_matrix.m[2][2] = -g.z;
 
+
+
 		translate_matrix= translate(-e.x, -e.y, -e.z);
 
 		model_view_matrix =  rotate_matrix * translate_matrix;
@@ -357,16 +362,32 @@ public:
 		persp_matrix = ortho*persp_to_ortho;*/
 		
 		Matrix4<T> persp_matrix;
+
 		persp_matrix.m[0][0] = 2 * n / (r - l);
 		persp_matrix.m[1][1] = 2 * n / (t - b);
-		persp_matrix.m[0][2] = (r + l) / (r - l);
-		persp_matrix.m[1][2] = (t + b) / (t - b);
+		persp_matrix.m[2][0] = (r + l) / (r - l);
+		persp_matrix.m[2][1] = (t + b) / (t - b);
 		persp_matrix.m[2][2] = (f + n) / (n - f);
-		persp_matrix.m[3][2] = 1;
-		persp_matrix.m[2][3] = -2 * f * n / (n - f);
+		persp_matrix.m[2][3] = -1;
+		persp_matrix.m[3][2] = 2 * f * n / (n - f);
 
 		return persp_matrix;
 
+	}
+
+	Matrix4<T> set_viewport(int width, int height)
+	{
+		
+		Matrix4<T> viewport_matrix;
+		viewport_matrix.set_identity();
+		viewport_matrix.m[0][0] = width/2.f;
+		viewport_matrix.m[1][1] = height/2.f;
+		viewport_matrix.m[0][3] = (width + 1) / 2.f;
+		viewport_matrix.m[1][3] = (height + 1) / 2.f;
+		viewport_matrix.m[2][3] = (height + 1) / 2.f;
+		
+
+		return viewport_matrix;
 	}
 
 	Matrix4<T> set_mvp(Vector3<T> center, Vector3<T> e, Vector3<T> g, Vector3<T> t, T l, T r, T b, T top, T f, T n)

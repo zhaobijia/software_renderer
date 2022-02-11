@@ -11,6 +11,7 @@ struct ILight
 	Color color;
 	ILight() {};
 	ILight(float3 pos, float3 dir, Color c) :position(pos),direction(dir),color(c) {};
+	ILight(ILight &light) { position = light.position; direction = light.direction; color = light.color; }
 	virtual ~ILight() {};
 
 };

@@ -6,17 +6,17 @@
 
 int main()
 {	
-
+	int height = 800;
+	int width = 800;
 	Scene sample_scene;
-	sample_scene.init();
+	BlinnPhongShader shader;
+	sample_scene.init(shader, width, height);
 
 	//Set shader
-	PhongShader shader;
-	shader._mvp = sample_scene.mvp;
-	shader._cam_pos = sample_scene.cam.position;
+
 	TCHAR* title = _T("software_renderer");
 		
-	Window window(800,800);
+	Window window(width,height);
 	window.set_camera(&(sample_scene.cam));
 
 	if (window.initialize_window(title))
@@ -30,10 +30,7 @@ int main()
 		window.window_messages();
 		window.frame->clear_buffers();
 		//update:
-		sample_scene.update();
-		//update shader:
-		shader._mvp = sample_scene.mvp;
-		shader._cam_pos = sample_scene.cam.position;
+		sample_scene.update(shader);
 
 		window.frame->rasterize(sample_scene, shader);
 		window.window_update();
