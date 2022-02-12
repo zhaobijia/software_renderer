@@ -50,21 +50,59 @@ void Mesh::read_obj_from_file(const char* filename)
 		else if (line.compare(0, 2, "f ") == 0)
 		{
 			std::vector<int> v_read(3), vt_read(3), vn_read(3);
-			int read_count = sscanf(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &v_read[0], &vt_read[0], &vn_read[0], &v_read[1], &vt_read[1], &vn_read[1], &v_read[2], &vt_read[2], &vn_read[2]);
 
-			if (read_count != 9)
+			int v_ext, vt_ext, vn_ext; //4th vertex for the quad representation
+			int read_count = sscanf(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &v_read[0], &vt_read[0], &vn_read[0], &v_read[1], &vt_read[1], &vn_read[1], &v_read[2], &vt_read[2], &vn_read[2], &v_ext, &vt_ext, &vn_ext);
+
+			if (read_count <= 9)
 			{
-				read_count = sscanf(line.c_str(), "f %d %d %d", &v_read[0], &v_read[1], &v_read[2]);
+				if (read_count < 9)
+				{
+					read_count = sscanf(line.c_str(), "f %d %d %d", &v_read[0], &v_read[1], &v_read[2]);
+				}
+				for (int i = 0; i < 3; i++)
+				{
+					v_read[i]--;
+					vt_read[i]--;
+					vn_read[i]--;
+				}
+				vert_faces.push_back(v_read);
+				uv_faces.push_back(vt_read);
+				norm_faces.push_back(vn_read);
 			}
-			for (int i = 0; i < 3; i++)
+			else
 			{
-				v_read[i]--;
-				vt_read[i]--;
-				vn_read[i]--;
+				std::vector<int> v_read_ext(3), vt_read_ext(3), vn_read_ext(3);
+				for (int i = 0; i < 3; i++)
+				{
+					v_read[i]--;
+					vt_read[i]--;
+					vn_read[i]--;
+				}
+				v_ext--;
+				vt_ext--;
+				vn_ext--;
+
+				v_read_ext[0] = v_read[1];
+				v_read_ext[1] = v_ext;
+				v_read_ext[2] = v_read[2];
+
+				vt_read_ext[0] = vt_read[1];
+				vt_read_ext[1] = vt_ext;
+				vt_read_ext[2] = vt_read[2];
+
+				vn_read_ext[0] = vn_read[1];
+				vn_read_ext[1] = vn_ext;
+				vn_read_ext[2] = vn_read[2];
+
+				vert_faces.push_back(v_read);
+				uv_faces.push_back(vt_read);
+				norm_faces.push_back(vn_read);
+				
+				vert_faces.push_back(v_read_ext);
+				uv_faces.push_back(vt_read_ext);
+				norm_faces.push_back(vn_read_ext);
 			}
-			vert_faces.push_back(v_read);
-			uv_faces.push_back(vt_read);
-			norm_faces.push_back(vn_read);
 
 		}
 	}
@@ -73,6 +111,11 @@ void Mesh::read_obj_from_file(const char* filename)
 	std::cout << "normal faces:" << norm_faces.size() << ",";
 
 
+}
+
+Texture* Mesh::get_diffuse_texture()
+{
+	return diffuse_texture;
 }
 void Mesh::set_diffuse_texture(Texture* texture)
 {
@@ -83,6 +126,22 @@ void Mesh::set_diffuse_texture(Texture* texture)
 bool Mesh::has_diffuse_texture()
 {
 	return has_diffuse;
+}
+
+Texture* Mesh::get_normal_texture()
+{
+	return normal_texture;
+}
+
+void Mesh::set_normal_texture(Texture* texture)
+{
+	normal_texture = texture;
+	has_normal = true;
+}
+
+bool Mesh::has_normal_texture()
+{
+	return has_normal;
 }
 
 int Mesh::vertex_count()
@@ -130,10 +189,7 @@ std::vector<int> Mesh::get_normal_idx(int idx)
 	return norm_faces[idx];
 	
 }
-Texture* Mesh::get_diffuse_texture()
-{
-	return diffuse_texture;
-}
+
 
 float3 Mesh::get_vertex_with_face_idx(int f_idx, int v_idx)
 {

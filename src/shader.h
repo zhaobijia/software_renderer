@@ -145,7 +145,7 @@ struct PhongShader : IShader
 		float3 pos = _varying_pos[0] + (_varying_pos[1] - _varying_pos[0]) * bary.x + (_varying_pos[2] - _varying_pos[0]) * bary.y;
 		float3 normal = (_varying_normals[0] + (_varying_normals[1] - _varying_normals[0]) * bary.x + (_varying_normals[2] - _varying_normals[0]) * bary.y).normalize();
 		float3 view_dir = (_cam_pos-pos).normalize();
-		float3 reflect_dir = reflect(_light.direction*-1, normal).normalize();
+		float3 reflect_dir = reflect(_light.direction, normal).normalize();
 		_specular_intensity =std::pow( std::max(view_dir.dot(reflect_dir), 0.f),32)*0.5;
 		Color specular = _specular* _specular_intensity;
 
@@ -177,7 +177,7 @@ struct BlinnPhongShader: IShader
 	virtual float3 vertex(int v_idx, float3 vertex, float3 normal)
 	{
 
-		_normal = (_mvp * normal);
+		_normal = (_mvp* normal);
 		float intensity = (_light.direction * -1).dot(_normal);
 		_varying_intensity[v_idx] = std::max(0.0f, intensity);
 		float3 v = _mvp * vertex;
@@ -204,7 +204,7 @@ struct BlinnPhongShader: IShader
 		float3 normal = (_varying_normals[0] + (_varying_normals[1] - _varying_normals[0]) * bary.x + (_varying_normals[2] - _varying_normals[0]) * bary.y).normalize();
 		float3 view_dir = (_cam_pos - pos).normalize();
 		float3 light_dir = _light.direction.normalize()*-1;
-		float3 halfway_dir = (light_dir  + view_dir).normalize();
+		float3 halfway_dir = (light_dir -  view_dir).normalize();
 		
 		_specular_intensity = std::pow(std::max((normal).dot(halfway_dir), 0.f), 32);
 

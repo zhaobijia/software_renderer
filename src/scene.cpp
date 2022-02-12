@@ -13,9 +13,11 @@ void Scene::init(IShader& shader, int width, int height)
 	//Hard coded sample scene here
 	//--> todo: change to reading scene config file
 	load_mesh("african_head.obj");
-	load_texture("assets/african_head_diffuse.tga");
-	set_directional_light(float3(0,0,0),float3(0, 0, -1), WHITE);
-	set_camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), float3(0, 0, -1.5));
+	load_texture("african_head_diffuse.tga");
+	//load_normal_map("african_head_nm.png");
+
+	set_directional_light(float3(0,0,0),float3(-1, -1, -1), WHITE);
+	set_camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), float3(0, 0, -2));
 	set_viewport(width,height);
 	calculate_mvp();
 	//set up type of shader
@@ -40,6 +42,12 @@ void Scene::load_texture(const char* filename)
 	texture_ptr = new Texture(filename);
 	mesh.set_diffuse_texture(texture_ptr);
 
+}
+
+void Scene::load_normal_map(const char* filename)
+{
+	normal_map_ptr = new Texture(filename);
+	mesh.set_normal_texture(normal_map_ptr);
 }
 
 void Scene::set_directional_light(float3 pos, float3 dir, Color color)
@@ -93,13 +101,13 @@ void Scene::update_phong_shader(PhongShader& shader)
 
 void Scene::update_blinn_phong_shader(BlinnPhongShader& shader)
 {
-	shader._mvp = mvp;
-	shader._cam_pos = cam.position;
 
 	ILight light_update(light);
 	float3 pos = mvp * light.position;
 	float3 pos_dir = light.position + light.direction;
 	light_update.direction = mvp * pos_dir - pos;
 
+	shader._mvp = mvp;
+	shader._cam_pos = cam.position;
 	shader._light = light_update;
 }

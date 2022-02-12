@@ -17,16 +17,20 @@ private:
 
 	Texture* diffuse_texture = NULL;
 	bool has_diffuse = false;
+	Texture* normal_texture = NULL;
+	bool has_normal = false;
 	
 public:
 	Mesh();
 	~Mesh();
 
 	void read_obj_from_file(const char* filename);
-	void Mesh::set_diffuse_texture(Texture* texture);
+	void set_diffuse_texture(Texture* texture);
+	void set_normal_texture(Texture* texture);
 	int vertex_count();
 	int face_count();
 	bool has_diffuse_texture();
+	bool has_normal_texture();
 
 	float3 get_vertex(int idx);//get actual position value with idx in the read-in vertices array
 	int2 get_uv_coord(int idx);//get actual uv value with idx in the read-in uvs array
@@ -41,6 +45,7 @@ public:
 	float3 get_normal_with_face_idx(int f_idx, int n_idx);
 
 	Texture* get_diffuse_texture();
+	Texture* get_normal_texture();
 };
 
 

@@ -14,6 +14,7 @@ private:
 public:
 	Mesh mesh;
 	Texture* texture_ptr = NULL;
+	Texture* normal_map_ptr = NULL;
 	Camera cam;
 	float4x4 mvp ,viewport_matrix;
 	ILight light;
@@ -25,6 +26,8 @@ public:
 	void update(IShader& shader);
 	void load_mesh(const char* filename);
 	void load_texture(const char* filename);
+	void load_normal_map(const char* filename);
+
 	void set_directional_light(float3 pos, float3 dir, Color color);
 	void set_point_light(float3 pos,float3 dir, Color color);
 	void set_spotlight(float3 pos, float3 dir, float phi, Color color);

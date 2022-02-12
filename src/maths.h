@@ -365,11 +365,11 @@ public:
 
 		persp_matrix.m[0][0] = 2 * n / (r - l);
 		persp_matrix.m[1][1] = 2 * n / (t - b);
-		persp_matrix.m[2][0] = (r + l) / (r - l);
-		persp_matrix.m[2][1] = (t + b) / (t - b);
+		persp_matrix.m[0][2] = (r + l) / (r - l);
+		persp_matrix.m[1][2] = (t + b) / (t - b);
 		persp_matrix.m[2][2] = (f + n) / (n - f);
-		persp_matrix.m[2][3] = -1;
-		persp_matrix.m[3][2] = 2 * f * n / (n - f);
+		persp_matrix.m[3][2] = 1;
+		persp_matrix.m[2][3] = -2 * f * n / (n - f);
 
 		return persp_matrix;
 
@@ -380,12 +380,12 @@ public:
 		
 		Matrix4<T> viewport_matrix;
 		viewport_matrix.set_identity();
+
 		viewport_matrix.m[0][0] = width/2.f;
 		viewport_matrix.m[1][1] = height/2.f;
 		viewport_matrix.m[0][3] = (width + 1) / 2.f;
 		viewport_matrix.m[1][3] = (height + 1) / 2.f;
 		viewport_matrix.m[2][3] = (height + 1) / 2.f;
-		
 
 		return viewport_matrix;
 	}

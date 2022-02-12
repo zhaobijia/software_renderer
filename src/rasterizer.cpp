@@ -300,7 +300,6 @@ void Rasterizer::rasterize(Scene& scene, IShader& shader)
             //vertex shader applies:
             verts[j]= shader.vertex(j, verts[j], normals[j]);
             screen_coord[j] = scene.viewport_matrix * verts[j];
-
         }
 
         float3 screen_normal = ((screen_coord[2] - screen_coord[0]).cross(screen_coord[1] - screen_coord[0])).normalize();
