@@ -16,7 +16,7 @@ void Scene::init(IShader& shader, int width, int height)
 	load_texture("african_head_diffuse.tga");
 	load_normal_map("african_head_nm_tangent.png");
 
-	set_directional_light(float3(0,0,0),float3(-1, -1, -1), WHITE);
+	set_directional_light(float3(0,0,0),float3(0, 0, -1), WHITE);
 	set_camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), float3(0, 0, -2));
 	set_viewport(width,height);
 	calculate_matrices();
@@ -91,42 +91,39 @@ void Scene::calculate_matrices()
 
 }
 
-void Scene::update_phong_shader(PhongShader& shader)
-{
-	shader._mvp =mvp;
-	shader._cam_pos = cam.position;
-
-	ILight light_update (light);
-	float3 pos = mvp.mul(light.position,1);
-	float3 pos_dir = light.position + light.direction;
-	light_update.direction = mvp.mul(pos_dir,1) - pos;
-	shader._light = light_update;
-}
-
-void Scene::update_blinn_phong_shader(BlinnPhongShader& shader)
-{
-
-	ILight light_update(light);
-	float3 pos = mvp.mul(light.position,1);
-	float3 pos_dir = light.position + light.direction;
-	light_update.direction = mvp.mul(pos_dir,0) - pos;
-
-	shader._mvp = mvp;
-	shader._m = m;
-	shader._cam_pos = cam.position;
-	shader._light = light_update;
-}
+//void Scene::update_phong_shader(PhongShader& shader)
+//{
+//	shader._mvp =mvp;
+//	shader._cam_pos = cam.position;
+//
+//	ILight light_update (light);
+//	float3 pos = mvp.mul(light.position,1);
+//	float3 pos_dir = light.position + light.direction;
+//	light_update.direction = mvp.mul(pos_dir,1) - pos;
+//	shader._light = light_update;
+//}
+//
+//void Scene::update_blinn_phong_shader(BlinnPhongShader& shader)
+//{
+//
+//	ILight light_update(light);
+//	float3 pos = mvp.mul(light.position,1);
+//	float3 pos_dir = light.position + light.direction;
+//	light_update.direction = mvp.mul(pos_dir,0) - pos;
+//
+//	shader._mvp = mvp;
+//	shader._m = m;
+//	shader._cam_pos = cam.position;
+//	shader._light = light_update;
+//}
 
 void Scene::update_textured_shader(TexturedShader& shader)
 {
-	ILight light_update(light);
-	float3 pos = mvp.mul(light.position,1);
-	float3 pos_dir = light.position + light.direction;
-	light_update.direction = mvp.mul(pos_dir,0) - pos;
 
 	shader._mvp = mvp;
 	shader._mv = mv;
 	shader._m = m;
 	shader._cam_pos = cam.position;
-	shader._light = light_update;
+	shader._light = light;
+
 }

@@ -283,7 +283,6 @@ void Mesh::calculate_tangents()
 	//average tan for each vertex
 	for (int i = 0; i <vertices ; i++)
 	{
-		//std::cout << "for each vertex: vert tant dict at vert_idx: "<<i<<", " << vert_tangent_dict[i].size() << std::endl;
 		int size = vert_tangent_dict[i].size();
 		float3 temp_t;
 		for (int j = 0; j < size; j++)
