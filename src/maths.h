@@ -360,8 +360,6 @@ public:
 		rotate_matrix.m[2][1] = -g.y;
 		rotate_matrix.m[2][2] = -g.z;
 
-
-
 		translate_matrix= translate(-e.x, -e.y, -e.z);
 
 		model_view_matrix =  rotate_matrix * translate_matrix;

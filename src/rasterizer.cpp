@@ -299,18 +299,19 @@ void Rasterizer::rasterize(Scene& scene, IShader& shader)
             //the 3 vertices of a triangle
             float3 verts[3], normals[3];
             float2 uvs[3];
-            float3 tangent;
+            float3 tangent[3];
             //screen coordinates(change to float3 b/c adding zbuffer)
             float3 screen_coord[3];
-            tangent = scene.mesh.get_tangent(i);
+            
             for (int j = 0; j < 3; j++)
             {
                 verts[j] = scene.mesh.get_vertex_with_face_idx(i, j);
                 normals[j] = scene.mesh.get_normal_with_face_idx(i, j);//normal from mesh not normal map
                 uvs[j] = scene.mesh.get_uv_with_face_idx(i, j);
+                tangent[j] = scene.mesh.get_tangent_with_face_idx(i,j);
                 //vertex shader applies:
 
-                verts[j] = shader.vertex(j, verts[j], normals[j], uvs[j], tangent);
+                verts[j] = shader.vertex(j, verts[j], normals[j], uvs[j], tangent[j]);
                 screen_coord[j] = scene.viewport_matrix.mul(verts[j],1);
             }
             //back face culling check

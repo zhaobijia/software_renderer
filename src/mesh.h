@@ -3,7 +3,7 @@
 #include <vector>
 #include "maths.h"
 #include "texture.h"
-
+#include <unordered_map>
 class Mesh
 {
 private:
@@ -16,6 +16,7 @@ private:
 	std::vector<std::vector<int>> vert_faces;
 	std::vector<std::vector<int>> uv_faces;
 	std::vector<std::vector<int>> norm_faces;
+	std::vector<std::vector<int>> tangent_faces;
 
 	Texture* diffuse_texture = NULL;
 	bool has_diffuse = false;
@@ -43,10 +44,13 @@ public:
 	std::vector<int> get_pos_idx(int idx);//3 indices of position value for a certain triangle-face with index idx in vert_faces array
 	std::vector<int> get_uv_idx(int idx);//3 indices of uv value for a certain triangle-face with index idx in uv_faces array
 	std::vector<int> get_normal_idx(int idx); //3 indices of normal value for a certain triangle-face with index idx in norm_faces array
+	std::vector<int> get_tangent_idx(int idx);
+
 
 	float3 get_vertex_with_face_idx(int f_idx, int v_idx);
 	float2 get_uv_with_face_idx(int f_idx, int u_idx);
 	float3 get_normal_with_face_idx(int f_idx, int n_idx);
+	float3 get_tangent_with_face_idx(int f_idx, int t_idx);
 
 	void calculate_tangents();
 

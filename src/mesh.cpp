@@ -4,6 +4,7 @@
 #include "mesh.h"
 
 
+
 Mesh::Mesh() {}
 
 Mesh::~Mesh() 
@@ -193,6 +194,12 @@ std::vector<int> Mesh::get_normal_idx(int idx)
 	
 }
 
+std::vector<int> Mesh::get_tangent_idx(int idx)
+{
+	//return at face index idx, what would be tangent idx
+	return tangent_faces[idx];
+
+}
 
 float3 Mesh::get_vertex_with_face_idx(int f_idx, int v_idx)
 {
@@ -216,14 +223,34 @@ float3 Mesh::get_normal_with_face_idx(int f_idx, int n_idx)
 	return norm;
 }
 
+float3 Mesh::get_tangent_with_face_idx(int f_idx, int t_idx)
+{
+	std::vector<int> tan_idx = get_tangent_idx(f_idx);
+	float3 tangent = get_tangent(tan_idx[t_idx]);
+	return tangent;
+}
+
 //reference:
 //https://learnopengl.com/Advanced-Lighting/Normal-Mapping
 void Mesh::calculate_tangents()
 {
-	//calculate tangents for each triangle face
+
 	int faces = face_count();
+	std::unordered_map<int, std::vector<float3>> vert_tangent_dict;
 	for (int i = 0; i < faces; i++)
 	{
+		std::vector<int> pos_idx = get_pos_idx(i);
+		int vert_idx_0 = pos_idx[0];
+		int vert_idx_1 = pos_idx[1];
+		int vert_idx_2 = pos_idx[2];
+
+		std::vector<int> tangent_indices;
+
+		tangent_indices.push_back(vert_idx_0);
+		tangent_indices.push_back(vert_idx_1);
+		tangent_indices.push_back(vert_idx_2);
+		tangent_faces.push_back(tangent_indices);
+
 		float3 pos0 = get_vertex_with_face_idx(i, 0); 
 		float3 pos1 = get_vertex_with_face_idx(i, 1);
 		float3 pos2 = get_vertex_with_face_idx(i, 2);
@@ -232,44 +259,40 @@ void Mesh::calculate_tangents()
 		float2 uv1 = get_uv_with_face_idx(i, 1);
 		float2 uv2 = get_uv_with_face_idx(i, 2);
 		//..........edge
-		float3 edge01 = pos1 - pos0;
-		float3 edge02 = pos2 - pos0;
-
-		float3 edge11 = pos2 - pos1;
-		float3 edge12 = pos0 - pos1;
-
-		float3 edge21 = pos0 - pos2;
-		float3 edge22 = pos1 - pos2;
+		float3 edge1 = pos1 - pos0;
+		float3 edge2 = pos2 - pos0;
 		//..........uv
-		float2 d_uv01 = uv1 - uv0;
-		float2 d_uv02 = uv2 - uv0;
+		float2 d_uv1 = uv1 - uv0;
+		float2 d_uv2 = uv2 - uv0;
 
-		float2 d_uv11 = uv2 - uv1;
-		float2 d_uv12 = uv0 - uv1;
+		float f0 = 1.f / (d_uv1.x * d_uv2.y - d_uv2.x * d_uv1.y);
 
-		float2 d_uv21 = uv0 - uv2;
-		float2 d_uv22 = uv1 - uv2;
-
-		float f0 = 1.f / (d_uv01.x * d_uv02.y - d_uv02.x * d_uv01.y);
-		float f1 = 1.f / (d_uv11.x * d_uv12.y - d_uv12.x * d_uv11.y);
-		float f2 = 1.f / (d_uv21.x * d_uv22.y - d_uv22.x * d_uv21.y);
+		float3 tan;
+		tan.x = f0 * (d_uv2.x * edge1.x - d_uv1.x * edge2.x);
+		tan.y = f0 * (d_uv2.x * edge1.y - d_uv1.x * edge2.y);
+		tan.z = f0 * (d_uv2.x * edge1.z - d_uv1.x * edge2.z);
+		//for each vertex, it might have multiple possible tangent and normal values depending on how many triangles are around it.
+		//try to store multiple tangents on one vertex, and average/interpolate later
 		
-		float3 tan0, tan1, tan2;
-		tan0.x = f0 * (d_uv02.x * edge01.x - d_uv01.x * edge02.x);
-		tan0.y = f0 * (d_uv02.x * edge01.y - d_uv01.x * edge02.y);
-		tan0.z = f0 * (d_uv02.x * edge01.z - d_uv01.x * edge02.z);
-
-		tan1.x = f1 * (d_uv12.x * edge11.x - d_uv11.x * edge12.x);
-		tan1.y = f1 * (d_uv12.x * edge11.y - d_uv11.x * edge12.y);
-		tan1.z = f1 * (d_uv12.x * edge11.z - d_uv11.x * edge12.z);
-
-		tan2.x = f2 * (d_uv22.x * edge21.x - d_uv21.x * edge22.x);
-		tan2.y = f2 * (d_uv22.x * edge21.y - d_uv21.x * edge22.y);
-		tan2.z = f2 * (d_uv22.x * edge21.z - d_uv21.x * edge22.z);
-
-		float3 tan = (tan0.normalize() + tan1.normalize() + tan2.normalize()) * 0.33333f;
-		tangents.push_back(tan0.normalize());
+		vert_tangent_dict[vert_idx_0].push_back(tan.normalize());
+		vert_tangent_dict[vert_idx_1].push_back(tan.normalize());
+		vert_tangent_dict[vert_idx_2].push_back(tan.normalize());
 
 	}
+	int vertices = vertex_count();
+	//average tan for each vertex
+	for (int i = 0; i <vertices ; i++)
+	{
+		//std::cout << "for each vertex: vert tant dict at vert_idx: "<<i<<", " << vert_tangent_dict[i].size() << std::endl;
+		int size = vert_tangent_dict[i].size();
+		float3 temp_t;
+		for (int j = 0; j < size; j++)
+		{
+			temp_t = temp_t + vert_tangent_dict[i][j];
+		}
+		tangents.push_back(temp_t.normalize());
+	}
+	
+
 
 }

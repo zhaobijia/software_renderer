@@ -217,12 +217,13 @@ struct BlinnPhongShader: IShader
 //shaders below 
 struct TexturedShader : IShader
 {
-	float4x4 _mvp, _m;
+	float4x4 _mvp, _mv,_m;
 	float3 _normal,_tangent;
 	float _varying_intensity[3];
 	float3 _varying_pos[3];
 	float3 _varying_normals[3];
 	float2 _varying_uvs[3];
+	float3 _varying_tangents[3];
 	ILight _light;
 	float3 _cam_pos;
 	//textures:
@@ -248,7 +249,7 @@ struct TexturedShader : IShader
 
 		//build tbn matrix:
 		_varying_normals[v_idx] = (_mvp.mul(normal,0)).normalize();
-		_tangent = (_mvp.mul(tangent,0)).normalize();
+		_varying_tangents[v_idx] = _mv.mul(tangent,0).normalize();
 		_ambient = _light.color;
 		_diffuse = _light.color;
 		_specular = _light.color;
@@ -260,8 +261,9 @@ struct TexturedShader : IShader
 		float2 uv = _varying_uvs[0] + (_varying_uvs[1] - _varying_uvs[0]) * bary.x + (_varying_uvs[2] - _varying_uvs[0]) * bary.y;
 		
 		float3 normal = _varying_normals[0] + (_varying_normals[1] - _varying_normals[0]) * bary.x + (_varying_normals[2] - _varying_normals[0]) * bary.y;
-		float3 bitangent = _tangent.cross(normal);
-		float3x3 tbn_matrix(_tangent, bitangent, normal);
+		float3 tangent = _varying_tangents[0] + (_varying_tangents[1] - _varying_tangents[0]) * bary.x + (_varying_tangents[2] - _varying_tangents[0]) * bary.y;
+		float3 bitangent = tangent.cross(normal);
+		float3x3 tbn_matrix(tangent, bitangent, normal);
 
 		int normal_width = normal_map->get_width();
 		int normal_heihgt = normal_map->get_height();
@@ -290,9 +292,9 @@ struct TexturedShader : IShader
 		float3 light_dir = _light.direction.normalize() * -1;
 		float3 halfway_dir = (light_dir + view_dir).normalize();
 
-		_specular_intensity = std::pow(std::max((_normal).dot(halfway_dir), 0.f), 32);
+		_specular_intensity = 0.2f* std::pow(std::max((_normal).dot(halfway_dir), 0.f), 32);
 
-		Color specular = RED * _specular_intensity;
+		Color specular = _specular * _specular_intensity;
 
 		return (specular+ ambient+diffuse) * color;
 	}

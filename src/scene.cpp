@@ -86,7 +86,7 @@ void Scene::set_viewport(int width, int height)
 void Scene::calculate_matrices()
 {
 	m = m.set_model(cam.target);
-	mv = m.set_model_view(cam.position, cam.lookat, cam.up);
+	mv = (mv.set_model_view(cam.position, cam.lookat, cam.up))*m;
 	mvp = mvp.set_mvp(cam.target, cam.position, cam.lookat, cam.up, cam.left, cam.right, cam.bottom, cam.top, cam.far_plane, cam.near_plane);
 
 }
@@ -125,6 +125,7 @@ void Scene::update_textured_shader(TexturedShader& shader)
 	light_update.direction = mvp.mul(pos_dir,0) - pos;
 
 	shader._mvp = mvp;
+	shader._mv = mv;
 	shader._m = m;
 	shader._cam_pos = cam.position;
 	shader._light = light_update;
