@@ -9,7 +9,7 @@ int main()
 	int height = 800;
 	int width = 800;
 	Scene sample_scene;
-	BlinnPhongShader shader;
+	TexturedShader shader;
 	sample_scene.init(shader, width, height);
 
 	//Set shader

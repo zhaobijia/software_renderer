@@ -14,23 +14,24 @@ void Scene::init(IShader& shader, int width, int height)
 	//--> todo: change to reading scene config file
 	load_mesh("african_head.obj");
 	load_texture("african_head_diffuse.tga");
-	//load_normal_map("african_head_nm.png");
+	load_normal_map("african_head_nm_tangent.png");
 
 	set_directional_light(float3(0,0,0),float3(-1, -1, -1), WHITE);
 	set_camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), float3(0, 0, -2));
 	set_viewport(width,height);
-	calculate_mvp();
+	calculate_matrices();
 	//set up type of shader
-	BlinnPhongShader& bp_shader = (BlinnPhongShader&)shader;
-	update_blinn_phong_shader(bp_shader);
+
+	update_textured_shader((TexturedShader&)shader);
+	//update_blinn_phong_shader((BlinnPhongShader&)shader);
 }
 void Scene::update(IShader& shader)
 {
 	//default orbit cam
 	cam.auto_orbit_horizontal(0.01f);
-	calculate_mvp();
-	BlinnPhongShader& bp_shader = (BlinnPhongShader&)shader;
-	update_blinn_phong_shader(bp_shader);
+	calculate_matrices();
+	update_textured_shader((TexturedShader&)shader);
+	//update_blinn_phong_shader((BlinnPhongShader&)shader);
 }
 
 void Scene::load_mesh(const char* filename)
@@ -82,9 +83,12 @@ void Scene::set_viewport(int width, int height)
 
 	viewport_matrix = viewport_matrix.set_viewport(width, height);
 }
-void Scene::calculate_mvp()
+void Scene::calculate_matrices()
 {
+	m = m.set_model(cam.target);
+	mv = m.set_model_view(cam.position, cam.lookat, cam.up);
 	mvp = mvp.set_mvp(cam.target, cam.position, cam.lookat, cam.up, cam.left, cam.right, cam.bottom, cam.top, cam.far_plane, cam.near_plane);
+
 }
 
 void Scene::update_phong_shader(PhongShader& shader)
@@ -93,9 +97,9 @@ void Scene::update_phong_shader(PhongShader& shader)
 	shader._cam_pos = cam.position;
 
 	ILight light_update (light);
-	float3 pos = mvp * light.position;
+	float3 pos = mvp.mul(light.position,1);
 	float3 pos_dir = light.position + light.direction;
-	light_update.direction = mvp * pos_dir - pos;
+	light_update.direction = mvp.mul(pos_dir,1) - pos;
 	shader._light = light_update;
 }
 
@@ -103,11 +107,25 @@ void Scene::update_blinn_phong_shader(BlinnPhongShader& shader)
 {
 
 	ILight light_update(light);
-	float3 pos = mvp * light.position;
+	float3 pos = mvp.mul(light.position,1);
 	float3 pos_dir = light.position + light.direction;
-	light_update.direction = mvp * pos_dir - pos;
+	light_update.direction = mvp.mul(pos_dir,0) - pos;
 
 	shader._mvp = mvp;
+	shader._m = m;
+	shader._cam_pos = cam.position;
+	shader._light = light_update;
+}
+
+void Scene::update_textured_shader(TexturedShader& shader)
+{
+	ILight light_update(light);
+	float3 pos = mvp.mul(light.position,1);
+	float3 pos_dir = light.position + light.direction;
+	light_update.direction = mvp.mul(pos_dir,0) - pos;
+
+	shader._mvp = mvp;
+	shader._m = m;
 	shader._cam_pos = cam.position;
 	shader._light = light_update;
 }

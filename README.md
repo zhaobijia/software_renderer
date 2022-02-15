@@ -12,8 +12,9 @@ It is an ongoing learning project inspired by [tinyrenderer](https://github.com/
 - Wavefront obj file parser
 - Reverse Z-Buffering
 - Back-face Culling
-- Perspective projection
+- Perspective correct interpolation
 - Texture mapping
+- Tangent space normal mapping
 - Shader based
 
 ### In progress (Todo/Wishlist <3 ):

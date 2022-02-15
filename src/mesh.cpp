@@ -121,6 +121,7 @@ void Mesh::set_diffuse_texture(Texture* texture)
 {
 	diffuse_texture = texture;
 	has_diffuse = true;
+	calculate_tangents();
 }
 
 bool Mesh::has_diffuse_texture()
@@ -159,11 +160,9 @@ float3 Mesh::get_vertex(int idx)
 	return vertices[idx];
 }
 
-int2 Mesh::get_uv_coord(int idx)
+float2 Mesh::get_uv_coord(int idx)
 {
-	float2 uv_01 = uvs[idx];
-	int2 uv_coord = int2(uv_01.x * diffuse_texture->get_width(), uv_01.y * diffuse_texture->get_height());
-	return uv_coord;
+	return uvs[idx];
 }
 
 float3 Mesh::get_normal(int idx)
@@ -171,6 +170,10 @@ float3 Mesh::get_normal(int idx)
 	return normals[idx];
 }
 
+float3 Mesh::get_tangent(int idx)
+{
+	return tangents[idx];
+}
 std::vector<int> Mesh::get_pos_idx(int idx)
 {
 
@@ -199,10 +202,10 @@ float3 Mesh::get_vertex_with_face_idx(int f_idx, int v_idx)
 
 	return vert;
 }
-int2 Mesh::get_uv_with_face_idx(int f_idx, int u_idx)
+float2 Mesh::get_uv_with_face_idx(int f_idx, int u_idx)
 {
 	std::vector<int> uv_idx = get_uv_idx(f_idx);
-	int2 uv = get_uv_coord(uv_idx[u_idx]);
+	float2 uv = get_uv_coord(uv_idx[u_idx]);
 
 	return uv;
 }
@@ -211,4 +214,62 @@ float3 Mesh::get_normal_with_face_idx(int f_idx, int n_idx)
 	std::vector<int> norm_idx = get_normal_idx(f_idx);
 	float3 norm = get_normal(norm_idx[n_idx]);
 	return norm;
+}
+
+//reference:
+//https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+void Mesh::calculate_tangents()
+{
+	//calculate tangents for each triangle face
+	int faces = face_count();
+	for (int i = 0; i < faces; i++)
+	{
+		float3 pos0 = get_vertex_with_face_idx(i, 0); 
+		float3 pos1 = get_vertex_with_face_idx(i, 1);
+		float3 pos2 = get_vertex_with_face_idx(i, 2);
+
+		float2 uv0 = get_uv_with_face_idx(i, 0);
+		float2 uv1 = get_uv_with_face_idx(i, 1);
+		float2 uv2 = get_uv_with_face_idx(i, 2);
+		//..........edge
+		float3 edge01 = pos1 - pos0;
+		float3 edge02 = pos2 - pos0;
+
+		float3 edge11 = pos2 - pos1;
+		float3 edge12 = pos0 - pos1;
+
+		float3 edge21 = pos0 - pos2;
+		float3 edge22 = pos1 - pos2;
+		//..........uv
+		float2 d_uv01 = uv1 - uv0;
+		float2 d_uv02 = uv2 - uv0;
+
+		float2 d_uv11 = uv2 - uv1;
+		float2 d_uv12 = uv0 - uv1;
+
+		float2 d_uv21 = uv0 - uv2;
+		float2 d_uv22 = uv1 - uv2;
+
+		float f0 = 1.f / (d_uv01.x * d_uv02.y - d_uv02.x * d_uv01.y);
+		float f1 = 1.f / (d_uv11.x * d_uv12.y - d_uv12.x * d_uv11.y);
+		float f2 = 1.f / (d_uv21.x * d_uv22.y - d_uv22.x * d_uv21.y);
+		
+		float3 tan0, tan1, tan2;
+		tan0.x = f0 * (d_uv02.x * edge01.x - d_uv01.x * edge02.x);
+		tan0.y = f0 * (d_uv02.x * edge01.y - d_uv01.x * edge02.y);
+		tan0.z = f0 * (d_uv02.x * edge01.z - d_uv01.x * edge02.z);
+
+		tan1.x = f1 * (d_uv12.x * edge11.x - d_uv11.x * edge12.x);
+		tan1.y = f1 * (d_uv12.x * edge11.y - d_uv11.x * edge12.y);
+		tan1.z = f1 * (d_uv12.x * edge11.z - d_uv11.x * edge12.z);
+
+		tan2.x = f2 * (d_uv22.x * edge21.x - d_uv21.x * edge22.x);
+		tan2.y = f2 * (d_uv22.x * edge21.y - d_uv21.x * edge22.y);
+		tan2.z = f2 * (d_uv22.x * edge21.z - d_uv21.x * edge22.z);
+
+		float3 tan = (tan0.normalize() + tan1.normalize() + tan2.normalize()) * 0.33333f;
+		tangents.push_back(tan0.normalize());
+
+	}
+
 }

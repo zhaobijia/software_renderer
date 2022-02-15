@@ -33,9 +33,17 @@ template<typename T> class Vector3
 {
 public:
 	T x, y, z;
+	T arr[3];
 	Vector3():x(0),y(0),z(0){}
-	Vector3(T _x, T _y, T _z) :x(_x), y(_y), z(_z) {}
+	Vector3(T _x, T _y, T _z) :x(_x), y(_y), z(_z) 
+	{
+		arr[0] = x;
+		arr[1] = y;
+		arr[2] = z;
+	}
 	~Vector3(){}
+
+	T* get_vector_arr() { return arr; }
 	T dot(const Vector3<T>& v){ return x * v.x + y * v.y + z * v.z; }
 	Vector3<T> cross(const Vector3<T>& v){ return Vector3<T>(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x); }
 	T len(){ return std::sqrt(x * x + y * y + z * z); }
@@ -74,6 +82,13 @@ public:
 		arr[2] = z;
 		arr[3] = w;
 	}
+	Vector4(Vector3<T> vec3, T t)
+	{
+		x = vec3.x;
+		y = vec3.y;
+		z = vec3.z;
+		w = t;
+	}
 	~Vector4(){}
    
 	T dot(const Vector4<T>& v){ return x * v.x + y * v.y + z * v.z + w * v.w; }
@@ -92,6 +107,53 @@ template<typename T> std::ostream& operator<<(std::ostream& out, const Vector4<T
 }
 
 //matrix
+
+template<typename T> class Matrix3
+{
+public:
+	T m[3][3] = { { 0,0,0 },{ 0,0,0 },{ 0,0,0 } };
+
+	Matrix3(void) {}
+	Matrix3(Vector3<T> i, Vector3<T> j, Vector3<T> k)
+	{
+		m[0][0] = i.x;
+		m[1][0] = i.y;
+		m[2][0] = i.z;
+
+		m[0][1] = j.x;
+		m[1][1] = j.y;
+		m[2][1] = j.z;
+
+		m[0][2] = k.x;
+		m[1][2] = k.y;
+		m[2][2] = k.z;
+
+	
+	}
+
+	~Matrix3() {}
+
+	Vector3<T> operator *(Vector3<T>& v)
+	{
+		T* v_arr = v.get_vector_arr();
+		T rv[3] = { 0,0,0}; //result vector
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				rv[i] += m[i][j] * v_arr[j];
+			}
+		}
+
+		return Vector3<T>(rv[0], rv[1], rv[2]);
+
+
+	}
+};
+
+
+
 template<typename T> class Matrix4
 {
 public:
@@ -147,11 +209,10 @@ public:
 		return matrix;
 	}
 
-	Vector4<T> operator *(Vector4<T>& v) //matrix multiply vector4
+	Vector3<T> mul(Vector3<T> v, T t)
 	{
-		T* v_arr = v.get_vector_arr();
-		T rv[4] = { 0,0,0,0 }; //result vector
-
+		T v_arr[4] = { v.x,v.y,v.z,t };
+		T rv[4] = { 0,0,0,0};
 		for (int i = 0; i < 4; i++)
 		{
 			for (int j = 0; j < 4; j++)
@@ -160,27 +221,16 @@ public:
 			}
 		}
 
-		return Vector4<T>(rv[0], rv[1], rv[2], rv[3]);
-	}
-
-	Vector3<T> operator *(Vector3<T>& v)
-	{
-		Vector4<T> h_v = v.to_homogeneous();
-		T* v_arr = h_v.get_vector_arr();
-		T rv[4] = { 0,0,0,0 }; //result vector
-
-		for (int i = 0; i < 4; i++)
+		if (t == 0)
 		{
-			for (int j = 0; j < 4; j++)
-			{
-				rv[i] += m[i][j] * v_arr[j];
-			}
+			return Vector3<T>(rv[0], rv[1], rv[2]);
 		}
-		rv[3] = rv[3] == 0 ? 0.001 : rv[3];
+		else {
+			rv[3] = rv[3] == 0 ? 0.001 : rv[3];
+
+			return Vector3<T>(rv[0] / rv[3], rv[1] / rv[3], rv[2] / rv[3]);
+		}
 		
-		return Vector3<T>(rv[0]/rv[3], rv[1] / rv[3], rv[2] / rv[3]);
-
-
 	}
 
 	
@@ -423,6 +473,7 @@ typedef Vector3<int> int3;
 typedef Vector4<float> float4;
 typedef Vector4<int> int4;
 
+typedef Matrix3<float> float3x3;
 typedef Matrix4<float> float4x4;
 typedef Matrix4<int> int4x4;
 
