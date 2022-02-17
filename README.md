@@ -3,7 +3,7 @@ A real-time shader-based software renderer written in c++.
 It is an ongoing learning project inspired by [tinyrenderer](https://github.com/ssloy/tinyrenderer) without using any Graphic APIs such as OpenGL, DirectX or Vulkan. The rendering takes place entirely on the CPU. My main goal is to get a better understanding of how mordern computer graphics work.
 
 ### Screenshots:
- 
+ ![diablo](/screenshots/diablo.gif?raw=true "diablo")
 
 ### Current Features:
 - Minimal dependencies

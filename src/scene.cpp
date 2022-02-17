@@ -12,12 +12,26 @@ void Scene::init(IShader& shader, int width, int height)
 {
 	//Hard coded sample scene here
 	//--> todo: change to reading scene config file
+
+	//"african head model" from tiny renderer
 	load_mesh("african_head.obj");
 	load_texture("african_head_diffuse.tga");
 	load_normal_map("african_head_nm_tangent.png");
-
-	set_directional_light(float3(0,0,0),float3(0, 0, -1), WHITE);
 	set_camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), float3(0, 0, -2));
+
+	////"floor model" from tiny renderer test for perspective correct
+	//load_mesh("floor.obj");
+	//load_texture("floor_diffuse.tga");
+	//load_normal_map("floor_nm_tangent.png");
+	//set_camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), float3(0, 0, -4));
+
+	////"diablo model" from tiny renderer
+	//load_mesh("diablo3_pose.obj");
+	//load_texture("diablo3_pose_diffuse.tga");
+	//load_normal_map("diablo3_pose_nm_tangent.tga");
+	//set_camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), float3(0, 0, -2));
+
+	set_directional_light(float3(0,0,0),float3(-1, -1, -1), WHITE);
 	set_viewport(width,height);
 	calculate_matrices();
 	//set up type of shader

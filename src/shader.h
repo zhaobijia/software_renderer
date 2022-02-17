@@ -292,7 +292,8 @@ struct TexturedShader : IShader
 		int nx = uv.x * normal_width;
 		int ny = uv.y * normal_heihgt;
 		float3 normal_textured = ((*normal_map).get_texture_normal()[(ny * normal_width + nx)]).normalize();
-		normal_textured = (normal_textured * 2.f - float3(1, 1, 1)).normalize();
+		//normal needs to be transform from [0,1] to [-1,1] range
+		normal_textured = (normal_textured * 2.f - float3(1.f, 1.f, 1.f)).normalize();
 		//lightings:
 		//ambient:
 		_ambient_intensity = 0.2f;
@@ -308,7 +309,7 @@ struct TexturedShader : IShader
 		float3 view_dir = (view_pos - pos).normalize();
 		float3 halfway_dir =(((light_dir*-1) - view_dir).normalize());
 
-		_specular_intensity =  std::pow(std::max((normal_textured).dot(halfway_dir), 0.f), 32)*0.2f;
+		_specular_intensity =  std::pow(std::max((normal_textured).dot(halfway_dir), 0.f), 32)*0.15f;
 
 		Color specular = _specular * _specular_intensity;
 
