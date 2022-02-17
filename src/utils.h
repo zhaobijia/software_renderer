@@ -3,7 +3,8 @@
 #include<algorithm>
 #include<iostream>
 #include "maths.h"
-
+#undef max
+#undef min
 #define RED Color(255,0,0)
 #define GREEN Color(0,255,0)
 #define BLUE Color(0,0,255)
@@ -34,4 +35,9 @@ inline float3 reflect(float3& light_in,  float3& normal)
 	return normal * (light_in.dot(normal) * 2) - light_in;
 }
 
+inline float clamp(float min, float max, float t)
+{
+	float c = std::max(min, std::min(t, max));
+	return c;
+}
 #endif //__UTILS_H__

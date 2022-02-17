@@ -196,11 +196,13 @@ void Rasterizer::draw_triangle(float3* tri, IShader& shader, Scene& scene)
             if (bary.x >= 0 - EPS && bary.y >= 0 - EPS && (bary.x + bary.y) <= 1.f + EPS)
             {
                 float3 pt = tri[0] + (tri[1] - tri[0]) * bary.x + (tri[2] - tri[0]) * bary.y;
-                pt.z = reverse_depth(pt.z, scene.cam.near_plane, scene.cam.far_plane);
+
+                pt.z= reverse_depth(pt.z, scene.cam.near_plane, scene.cam.far_plane);
+               // std::cout << pt.z << std::endl;
                 if (pt.z > get_zbuffer_value(i, j))
                 {     
                     Color color = shader.fragment(bary, Color(255, 255, 255));
-
+         
                     set_zbuffer_value(i, j, pt.z);
                     draw_pixel(i, j, color);
                 }
@@ -211,46 +213,6 @@ void Rasterizer::draw_triangle(float3* tri, IShader& shader, Scene& scene)
     
 }
 
-//void Rasterizer::draw_textured_triangle(float3* tri, int2* uv, Texture* uv_map, IShader& shader, Scene& scene)
-//{
-//    float2 pt0(tri[0].x, tri[0].y);
-//    float2 pt1(tri[1].x, tri[1].y);
-//    float2 pt2(tri[2].x, tri[2].y);
-//    box_t bbox = bounding_box(pt0, pt1, pt2);
-//    Color* texture = uv_map->get_texture_color();
-//    int texture_width = uv_map->get_width();
-//    int texture_height = uv_map->get_height();
-//
-//
-//    for (int i = bbox.min.x; i < bbox.max.x; i++)
-//    {
-//        for (int j = bbox.min.y; j < bbox.max.y; j++)
-//        {
-//            float3 _pt(i, j, 0);//zvalue can only be found after barycentric
-//            float3 bary = barycentric(_pt, tri[0], tri[1], tri[2]);//x = u, y = v, z=1
-//
-//            //check inside triangle
-//            if (bary.x >= 0 - EPS && bary.y >= 0 - EPS && (bary.x + bary.y) <= 1.f + EPS)
-//            {
-//                float3 pt = tri[0] + (tri[1] - tri[0]) * bary.x + (tri[2] - tri[0]) * bary.y;
-//                int2 uv_coord = uv[0] + (uv[1] - uv[0]) * bary.x + (uv[2] - uv[0]) * bary.y;
-//
-//                Color tex_color = texture[uv_coord.y * texture_width + uv_coord.x];
-//                pt.z = reverse_depth(pt.z,scene.cam.near_plane, scene.cam.far_plane);
-//                if (pt.z > get_zbuffer_value(i, j))
-//                {
-//                    Color color = shader.fragment(bary, tex_color);
-//                    //update z buffer
-//
-//                    set_zbuffer_value(i, j, pt.z);
-//                    draw_pixel(i, j, color);
-//                }
-//
-//            }
-//        }
-//    }
-//
-//}
 
 
 void Rasterizer::draw_wireframe(Mesh& mesh, float4x4 mvp)
@@ -280,7 +242,8 @@ void Rasterizer::draw_wireframe(Mesh& mesh, float4x4 mvp)
     }
 }
 
-
+//perspective-correct-interpolation reference:
+//https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/perspective-correct-interpolation-vertex-attributes
 void Rasterizer::rasterize(Scene& scene, IShader& shader)
 {
 
@@ -299,7 +262,7 @@ void Rasterizer::rasterize(Scene& scene, IShader& shader)
             //the 3 vertices of a triangle
             float3 verts[3], normals[3];
             float2 uvs[3];
-            float3 tangent[3];
+            float3 tangents[3];
             //screen coordinates(change to float3 b/c adding zbuffer)
             float3 screen_coord[3];
             
@@ -308,18 +271,16 @@ void Rasterizer::rasterize(Scene& scene, IShader& shader)
                 verts[j] = scene.mesh.get_vertex_with_face_idx(i, j);
                 normals[j] = scene.mesh.get_normal_with_face_idx(i, j);//normal from mesh not normal map
                 uvs[j] = scene.mesh.get_uv_with_face_idx(i, j);
-                tangent[j] = scene.mesh.get_tangent_with_face_idx(i,j);
-                //vertex shader applies:
+                tangents[j] = scene.mesh.get_tangent_with_face_idx(i,j);
 
-                verts[j] = shader.vertex(j, verts[j], normals[j], uvs[j], tangent[j]);
-                screen_coord[j] = scene.viewport_matrix.mul(verts[j],1);
+                screen_coord[j] = shader.vertex(j, verts[j], normals[j], uvs[j], tangents[j]);
+                
             }
             //back face culling check
-            float3 screen_normal = ((screen_coord[2] - screen_coord[0]).cross(screen_coord[1] - screen_coord[0])).normalize();
-            
+            float3 screen_normal = ((screen_coord[2] - screen_coord[0]).cross(screen_coord[1] - screen_coord[0])).normalize();     
             bool backface = screen_normal.dot(scene.light.direction);
             if (backface)
-            {                             
+            {        
                 //passing screen coords will cause perspective incorrect texture mapping ,fix: (TODO)
                 draw_triangle(screen_coord, t_shader, scene);
             }
@@ -364,9 +325,10 @@ void Rasterizer::rasterize(Scene& scene, IShader& shader)
 }
 
 //reference: https://learnopengl.com/Advanced-OpenGL/Depth-testing
+//no longer in use because of perspective correct interpolation
 float Rasterizer::reverse_depth(float depth, float near, float far)
 {
-    float z = depth * 2.f - 1.f;
-    return  z+ 2.f * near * far/(far-near);
+   // float z = depth * 2.f - 1.f;
+    return  2.f * near * far / (-far - near - depth * (near - far));//z+ 2.f * near * far/(far-near);
 }
 

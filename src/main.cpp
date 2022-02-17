@@ -12,8 +12,6 @@ int main()
 	TexturedShader shader;
 	sample_scene.init(shader, width, height);
 
-	//Set shader
-
 	TCHAR* title = _T("software_renderer");
 		
 	Window window(width,height);

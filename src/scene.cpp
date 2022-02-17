@@ -21,17 +21,14 @@ void Scene::init(IShader& shader, int width, int height)
 	set_viewport(width,height);
 	calculate_matrices();
 	//set up type of shader
-
-	update_textured_shader((TexturedShader&)shader);
-	//update_blinn_phong_shader((BlinnPhongShader&)shader);
+	update_shader((TexturedShader&)shader);
 }
 void Scene::update(IShader& shader)
 {
 	//default orbit cam
 	cam.auto_orbit_horizontal(0.01f);
 	calculate_matrices();
-	update_textured_shader((TexturedShader&)shader);
-	//update_blinn_phong_shader((BlinnPhongShader&)shader);
+	update_shader((TexturedShader&)shader);
 }
 
 void Scene::load_mesh(const char* filename)
@@ -87,42 +84,19 @@ void Scene::calculate_matrices()
 {
 	m = m.set_model(cam.target);
 	mv = (mv.set_model_view(cam.position, cam.lookat, cam.up))*m;
+	p = p.perspective_projection(cam.left, cam.right, cam.bottom, cam.top, cam.far_plane, cam.near_plane);
 	mvp = mvp.set_mvp(cam.target, cam.position, cam.lookat, cam.up, cam.left, cam.right, cam.bottom, cam.top, cam.far_plane, cam.near_plane);
 
 }
 
-//void Scene::update_phong_shader(PhongShader& shader)
-//{
-//	shader._mvp =mvp;
-//	shader._cam_pos = cam.position;
-//
-//	ILight light_update (light);
-//	float3 pos = mvp.mul(light.position,1);
-//	float3 pos_dir = light.position + light.direction;
-//	light_update.direction = mvp.mul(pos_dir,1) - pos;
-//	shader._light = light_update;
-//}
-//
-//void Scene::update_blinn_phong_shader(BlinnPhongShader& shader)
-//{
-//
-//	ILight light_update(light);
-//	float3 pos = mvp.mul(light.position,1);
-//	float3 pos_dir = light.position + light.direction;
-//	light_update.direction = mvp.mul(pos_dir,0) - pos;
-//
-//	shader._mvp = mvp;
-//	shader._m = m;
-//	shader._cam_pos = cam.position;
-//	shader._light = light_update;
-//}
 
-void Scene::update_textured_shader(TexturedShader& shader)
+void Scene::update_shader(TexturedShader& shader)
 {
-
 	shader._mvp = mvp;
 	shader._mv = mv;
 	shader._m = m;
+	shader._p = p;
+	shader._vp = viewport_matrix;
 	shader._cam_pos = cam.position;
 	shader._light = light;
 

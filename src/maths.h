@@ -18,6 +18,14 @@ public:
 	Vector2<T> operator +(const Vector2<T>& rhs){ return Vector2<T>(x + rhs.x, y + rhs.y); }
 	Vector2<T> operator -(const Vector2<T>& rhs){ return Vector2<T>(x - rhs.x, y - rhs.y); }
 	Vector2<T> operator *(float t){ return Vector2<T>(x * t, y * t); }
+	Vector2<T> operator /(float t)
+	{
+		if (t == 0)
+		{
+			return Vector2<T>(x, y);
+		}
+		return Vector2<T>(x / t, y / t);
+	}
 	template<typename U> friend std::ostream& operator <<(std::ostream& out, const Vector2<U>& v);
 	
 };
@@ -61,6 +69,14 @@ public:
 	Vector3<T> operator +(const Vector3<T>& rhs){ return Vector3<T>(x + rhs.x, y + rhs.y, z + rhs.z); }
 	Vector3<T> operator -(const Vector3<T>& rhs){ return Vector3<T>(x - rhs.x, y - rhs.y, z - rhs.z); }
 	Vector3<T> operator *(float t){ return Vector3<T>(x * t, y * t, z * t); }
+	Vector3<T> operator /(float t) 
+	{
+		if (t == 0)
+		{
+			return Vector3<T>(x, y, z);
+		}
+		return Vector3<T>(x / t, y / t, z / t); 
+	}
 	template<typename U> friend std::ostream& operator<< (std::ostream& out, const Vector3<U>& v);
 
 };
@@ -444,9 +460,9 @@ public:
 
 		viewport_matrix.m[0][0] = width/2.f;
 		viewport_matrix.m[1][1] = height/2.f;
-		viewport_matrix.m[0][3] = (width + 1) / 2.f;
-		viewport_matrix.m[1][3] = (height + 1) / 2.f;
-		viewport_matrix.m[2][3] = (height + 1) / 2.f;
+		viewport_matrix.m[0][3] = (width) / 2.f;
+		viewport_matrix.m[1][3] = (height) / 2.f;
+		//viewport_matrix.m[2][3] = (height + 1) / 2.f;
 
 		return viewport_matrix;
 	}

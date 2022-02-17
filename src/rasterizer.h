@@ -40,7 +40,6 @@ public:
 	float3 barycentric(float3 pt, float3 t0, float3 t1, float3 t2);
 
 	void draw_triangle(float3* tri, IShader& shader, Scene& scene);
-	void draw_textured_triangle(float3* tri, int2* uv, Texture* texture, IShader& shader, Scene& scene);
 	void draw_wireframe(Mesh& mesh, float4x4 mvp);
 	//void draw_flat_shading(Mesh* mesh, float4x4 mvp);
 	void rasterize(Scene& scene, IShader& shader);

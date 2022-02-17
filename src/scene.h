@@ -16,7 +16,7 @@ public:
 	Texture* texture_ptr = NULL;
 	Texture* normal_map_ptr = NULL;
 	Camera cam;
-	float4x4 m,mv,mvp ,viewport_matrix;
+	float4x4 m,mv,p,mvp ,viewport_matrix;
 	ILight light;
 
 
@@ -33,9 +33,7 @@ public:
 	void set_spotlight(float3 pos, float3 dir, float phi, Color color);
 	void set_camera(float3 position, float3 lookat, float3 up, float3 target);
 	void set_viewport(int width, int height);
-	void update_phong_shader(PhongShader& shader);
-	void update_blinn_phong_shader(BlinnPhongShader& shader);
-	void update_textured_shader(TexturedShader& shader);
+	void update_shader(TexturedShader& shader);
 	void calculate_matrices();
 };
 
