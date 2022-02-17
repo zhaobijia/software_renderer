@@ -4,10 +4,10 @@ It is an ongoing learning project inspired by [tinyrenderer](https://github.com/
 
 ### Screenshots:
 
- ![diablo](/screenshots/diablo.gif?raw=true "diablo" | width = 200)
+ ![diablo](/screenshots/diablo.gif?raw=true "diablo")
 
  testing perspective-correct interpolation:
- ![floor](/screenshots/floor.gif?raw=true "floor" | width = 200)
+ ![floor](/screenshots/floor.gif?raw=true "floor")
 
 ### Current Features:
 - Minimal dependencies
